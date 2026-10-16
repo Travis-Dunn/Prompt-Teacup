@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="
+             http://maven.apache.org/POM/4.0.0
+             https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.alchemysoftware</groupId>
+    <artifactId>prompt-teacup</artifactId>
+    <version>0.1.0</version>
+    <packaging>pom</packaging>
+
+    <name>Teacup</name>
+    <description>
+        Game.
+    </description>
+
+    <modules>
+        <module>game</module>
+    </modules>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <lwjgl.version>2.9.3</lwjgl.version>
+
+        <whitetail.version>0.1.10</whitetail.version>
+
+        <maven.compiler.source>1.7</maven.compiler.source>
+        <maven.compiler.target>1.7</maven.compiler.target>
+        <teacup.signature.artifactId>java17</teacup.signature.artifactId>
+        <teacup.signature.version>1.0</teacup.signature.version>
+
+        <teacup.toolchain.jdk.version>1.8</teacup.toolchain.jdk.version>
+        <maven.compiler.plugin.version>3.15.0</maven.compiler.plugin.version>
+        <maven.dependency.plugin.version>3.9.0</maven.dependency.plugin.version>
+        <animal.sniffer.plugin.version>1.27</animal.sniffer.plugin.version>
+        <maven.toolchains.plugin.version>3.2.0</maven.toolchains.plugin.version>
+        <teacup.natives.dir>${project.build.directory}/natives</teacup.natives.dir>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+
+            <dependency>
+                <groupId>org.lwjgl.lwjgl</groupId>
+                <artifactId>lwjgl</artifactId>
+                <version>${lwjgl.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.lwjgl.lwjgl</groupId>
+                <artifactId>lwjgl_util</artifactId>
+                <version>${lwjgl.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.lwjgl.lwjgl</groupId>
+                <artifactId>lwjgl-platform</artifactId>
+                <version>${lwjgl.version}</version>
+                <classifier>natives-windows</classifier>
+                <scope>runtime</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.lwjgl.lwjgl</groupId>
+                <artifactId>lwjgl-platform</artifactId>
+                <version>${lwjgl.version}</version>
+                <classifier>natives-linux</classifier>
+                <scope>runtime</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.lwjgl.lwjgl</groupId>
+                <artifactId>lwjgl-platform</artifactId>
+                <version>${lwjgl.version}</version>
+                <classifier>natives-osx</classifier>
+                <scope>runtime</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>com.alchemysoftware</groupId>
+                <artifactId>comp-logging-sys</artifactId>
+                <version>${whitetail.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alchemysoftware</groupId>
+                <artifactId>comp-scene-sys</artifactId>
+                <version>${whitetail.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.alchemysoftware</groupId>
+                <artifactId>comp-error-sys</artifactId>
+                <version>${whitetail.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.alchemysoftware</groupId>
+                <artifactId>comp-event-sys</artifactId>
+                <version>${whitetail.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.alchemysoftware</groupId>
+                <artifactId>comp-window</artifactId>
+                <version>${whitetail.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.alchemysoftware</groupId>
+                <artifactId>comp-resource-sys</artifactId>
+                <version>${whitetail.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alchemysoftware</groupId>
+                <artifactId>comp-math</artifactId>
+                <version>${whitetail.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alchemysoftware</groupId>
+                <artifactId>comp-mesh</artifactId>
+                <version>${whitetail.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alchemysoftware</groupId>
+                <artifactId>comp-image</artifactId>
+                <version>${whitetail.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.alchemysoftware</groupId>
+                <artifactId>comp-audio</artifactId>
+                <version>${whitetail.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alchemysoftware</groupId>
+                <artifactId>comp-audio-openal</artifactId>
+                <version>${whitetail.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alchemysoftware</groupId>
+                <artifactId>comp-script-sys</artifactId>
+                <version>${whitetail.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alchemysoftware</groupId>
+                <artifactId>comp-config-sys</artifactId>
+                <version>${whitetail.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alchemysoftware</groupId>
+                <artifactId>comp-renderer-gl33</artifactId>
+                <version>${whitetail.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alchemysoftware</groupId>
+                <artifactId>comp-timer</artifactId>
+                <version>${whitetail.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alchemysoftware</groupId>
+                <artifactId>comp-gc-priest</artifactId>
+                <version>${whitetail.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alchemysoftware</groupId>
+                <artifactId>comp-os-checker</artifactId>
+                <version>${whitetail.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alchemysoftware</groupId>
+                <artifactId>comp-user-dir</artifactId>
+                <version>${whitetail.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alchemysoftware</groupId>
+                <artifactId>comp-input-sys</artifactId>
+                <version>${whitetail.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alchemysoftware</groupId>
+                <artifactId>comp-input-lwjgl</artifactId>
+                <version>${whitetail.version}</version>
+            </dependency>
+
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-toolchains-plugin</artifactId>
+                <version>${maven.toolchains.plugin.version}</version>
+
+                <configuration>
+                    <toolchains>
+                        <jdk>
+                            <version>${teacup.toolchain.jdk.version}</version>
+                        </jdk>
+                    </toolchains>
+                </configuration>
+
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>toolchain</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>animal-sniffer-maven-plugin</artifactId>
+                <version>${animal.sniffer.plugin.version}</version>
+
+                <configuration>
+                    <signature>
+                        <groupId>org.codehaus.mojo.signature</groupId>
+                        <artifactId>${teacup.signature.artifactId}</artifactId>
+                        <version>${teacup.signature.version}</version>
+                    </signature>
+                </configuration>
+
+                <executions>
+                    <execution>
+                        <id>check-java-api-level</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+
+        <pluginManagement>
+            <plugins>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>${maven.compiler.plugin.version}</version>
+
+                    <configuration>
+                        <showDeprecation>true</showDeprecation>
+                        <compilerArgs>
+                            <arg>-Xlint:all,-options</arg>
+                        </compilerArgs>
+                    </configuration>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-dependency-plugin</artifactId>
+                    <version>${maven.dependency.plugin.version}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
+</project>

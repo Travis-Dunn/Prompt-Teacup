@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="
+             http://maven.apache.org/POM/4.0.0
+             https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.alchemysoftware</groupId>
+        <artifactId>prompt-teacup</artifactId>
+        <version>0.1.0</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>game</artifactId>
+    <packaging>jar</packaging>
+
+    <name>Prompt Teacup Game</name>
+    <description>
+        Main game module for Prompt Teacup.
+    </description>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>org.lwjgl.lwjgl</groupId>
+            <artifactId>lwjgl</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.lwjgl.lwjgl</groupId>
+            <artifactId>lwjgl_util</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.lwjgl.lwjgl</groupId>
+            <artifactId>lwjgl-platform</artifactId>
+            <classifier>natives-windows</classifier>
+        </dependency>
+
+        <dependency>
+            <groupId>org.lwjgl.lwjgl</groupId>
+            <artifactId>lwjgl-platform</artifactId>
+            <classifier>natives-linux</classifier>
+        </dependency>
+
+        <dependency>
+            <groupId>org.lwjgl.lwjgl</groupId>
+            <artifactId>lwjgl-platform</artifactId>
+            <classifier>natives-osx</classifier>
+        </dependency>
+
+        <!-- Whitetail components used directly by Teacup. -->
+
+        <dependency>
+            <groupId>com.alchemysoftware</groupId>
+            <artifactId>comp-logging-sys</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.alchemysoftware</groupId>
+            <artifactId>comp-error-sys</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.alchemysoftware</groupId>
+            <artifactId>comp-event-sys</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.alchemysoftware</groupId>
+            <artifactId>comp-window</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.alchemysoftware</groupId>
+            <artifactId>comp-resource-sys</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.alchemysoftware</groupId>
+            <artifactId>comp-math</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.alchemysoftware</groupId>
+            <artifactId>comp-mesh</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.alchemysoftware</groupId>
+            <artifactId>comp-image</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.alchemysoftware</groupId>
+            <artifactId>comp-audio</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.alchemysoftware</groupId>
+            <artifactId>comp-audio-openal</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.alchemysoftware</groupId>
+            <artifactId>comp-script-sys</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.alchemysoftware</groupId>
+            <artifactId>comp-config-sys</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.alchemysoftware</groupId>
+            <artifactId>comp-renderer-gl33</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.alchemysoftware</groupId>
+            <artifactId>comp-timer</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.alchemysoftware</groupId>
+            <artifactId>comp-gc-priest</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.alchemysoftware</groupId>
+            <artifactId>comp-scene-sys</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.alchemysoftware</groupId>
+            <artifactId>comp-os-checker</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.alchemysoftware</groupId>
+            <artifactId>comp-user-dir</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.alchemysoftware</groupId>
+            <artifactId>comp-input-sys</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.alchemysoftware</groupId>
+            <artifactId>comp-input-lwjgl</artifactId>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <plugins>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+
+                <executions>
+                    <execution>
+                        <id>unpack-natives</id>
+                        <phase>generate-resources</phase>
+
+                        <goals>
+                            <goal>unpack-dependencies</goal>
+                        </goals>
+
+                        <configuration>
+                            <includeGroupIds>org.lwjgl.lwjgl</includeGroupIds>
+                            <includeArtifactIds>lwjgl-platform</includeArtifactIds>
+                            <includeClassifiers>natives-windows,natives-linux,natives-osx</includeClassifiers>
+                            <outputDirectory>${teacup.natives.dir}</outputDirectory>
+                            <excludes>META-INF/**</excludes>
+                            <stripVersion>true</stripVersion>
+                            <overWriteReleases>false</overWriteReleases>
+                            <overWriteSnapshots>true</overWriteSnapshots>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+        </plugins>
+    </build>
+
+</project>
