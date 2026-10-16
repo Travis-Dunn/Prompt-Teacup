@@ -17,7 +17,7 @@ public final class Data {
     public static final GLProfile GL_PROFILE = GLProfile.CORE;
 
     public static float globalVolume;
-    public static boolean borderless, fullscreen, undecorated, vSync;
+    public static boolean borderless, fullscreen, vSync;
     public static int winW, winH;
     public static int screenW, screenH;
     public static int fpsTarget;
@@ -42,9 +42,6 @@ public final class Data {
     public static final int CFG_DEF_I_WIN_H = 720;
     public static final int CFG_MIN_I_WIN_H = 200;
     public static final int CFG_MAX_I_WIN_H = 5120;
-
-    public static final String CFG_STR_B_UNDECORATED = "bUndecorated";
-    public static final boolean CFG_DEF_B_UNDECORATED = false;
 
     public static final String CFG_STR_B_VSYNC = "bVsync";
     public static final boolean CFG_DEF_B_VSYNC = true;
@@ -89,13 +86,6 @@ public final class Data {
                 CFG_MIN_I_WIN_H,
                 CFG_MAX_I_WIN_H,
                 CFG_DEF_I_WIN_H));
-
-        ret.add(new ConfigEntry(
-                CFG_STR_B_UNDECORATED,
-                ConfigEntry.TYPE_BOOL,
-                null,
-                null,
-                CFG_DEF_B_UNDECORATED));
 
         ret.add(new ConfigEntry(
                 CFG_STR_B_VSYNC,

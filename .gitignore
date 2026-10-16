@@ -1,0 +1,14 @@
+# Maven build output
+target/
+**/target/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+
+# Java
+*.class
+
+# OS/editor junk
+.DS_Store
+*~

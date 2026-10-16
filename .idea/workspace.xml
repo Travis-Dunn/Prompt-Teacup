@@ -41,8 +41,7 @@
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
       <option name="MAIN_CLASS_NAME" value="com.alchemysoftware.teacup.scratch.EntryPoint" />
       <module name="game" />
-      <option name="PROGRAM_PARAMETERS" value="-ea" />
-      <option name="VM_PARAMETERS" value="-Djava.library.path=game/target/natives" />
+      <option name="VM_PARAMETERS" value="-Djava.library.path=game/target/natives -ea" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
