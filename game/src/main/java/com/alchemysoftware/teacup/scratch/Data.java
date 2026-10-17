@@ -3,6 +3,7 @@ package com.alchemysoftware.teacup.scratch;
 import com.alchemysoftware.whitetail.config.ConfigEntry;
 import com.alchemysoftware.whitetail.window.GLProfile;
 
+import java.awt.Font;
 import java.io.File;
 import java.util.ArrayList;
 
@@ -103,6 +104,12 @@ public final class Data {
 
         return ret;
     }
+
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Text ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
+    public static final String FONT_FOLDER = "fonts";
+    public static final String FONT_MICHROMA_FILENAME = "Michroma-Regular.ttf";
+    public static Font fontMichroma;
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Scenes ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
