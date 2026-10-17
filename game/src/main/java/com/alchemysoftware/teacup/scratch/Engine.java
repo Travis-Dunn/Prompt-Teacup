@@ -1,5 +1,6 @@
 package com.alchemysoftware.teacup.scratch;
 
+import com.alchemysoftware.teacup.layout.Layout;
 import com.alchemysoftware.teacup.scenes.SceneMainMenu;
 import com.alchemysoftware.teacup.text.Text;
 import com.alchemysoftware.whitetail.audio.openal.AudioContext;
@@ -123,7 +124,9 @@ public final class Engine {
             return false;
         }
 
-        if (!Text.Init(Window.GetWidth(), Window.GetHeight())) {
+        Layout.Init(Window.GetWidth(), Window.GetHeight());
+
+        if (!Text.Init()) {
             ErrorHandler.LogFatalAndStop(ERR_STR_FAIL_TEXT);
             _Shutdown();
             return false;

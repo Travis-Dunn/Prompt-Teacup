@@ -79,7 +79,7 @@ final class Baker {
             for (i = 0; i < n; ++i) boxW = Math.max(boxW, Advance(lines, i));
             boxH = ascent + (n - 1) * lineH + descent;
 
-            factor = AlignFactor(s.align);
+            factor = s.align.factor;
             offX = new float[n];
             for (i = 0; i < n; ++i)
                 offX[i] = factor * (boxW - Advance(lines, i));
@@ -178,14 +178,6 @@ final class Baker {
     private static float Advance(ArrayList<TextLayout> lines, int i) {
         TextLayout l = lines.get(i);
         return l == null ? 0.0f : l.getVisibleAdvance();
-    }
-
-    private static float AlignFactor(TextStyle.Align align) {
-        switch (align) {
-            case CENTER: return 0.5f;
-            case RIGHT:  return 1.0f;
-            default:     return 0.0f;
-        }
     }
 
     private static void Draw(BufferedImage img, ArrayList<TextLayout> lines,

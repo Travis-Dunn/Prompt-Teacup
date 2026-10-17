@@ -1,5 +1,7 @@
 package com.alchemysoftware.teacup.scenes;
 
+import com.alchemysoftware.teacup.layout.Anchor;
+import com.alchemysoftware.teacup.layout.Layout;
 import com.alchemysoftware.teacup.scratch.Data;
 import com.alchemysoftware.teacup.text.Label;
 import com.alchemysoftware.teacup.text.Text;
@@ -34,16 +36,17 @@ public final class SceneMainMenu extends Scene {
         buildStyle.align = TextStyle.Align.LEFT;
 
         if ((title = Text.Create(titleStyle, "PROMPT TEACUP")) == null) return;
-        title.setPosition(960.0f, 420.0f);
+        title.place(Layout.CANVAS, Anchor.CENTER, 0.0f, -150.0f);
         title.setColor(0.45f, 0.92f, 1.0f, 1.0f);
 
         if ((blurb = Text.Create(blurbStyle, BLURB_STR)) == null) return;
-        blurb.setPosition(960.0f, 520.0f);
+        blurb.place(Layout.CANVAS, Anchor.CENTER, 0.0f, 80.0f);
         blurb.setColor(0.86f, 0.86f, 0.80f, 1.0f);
 
         if ((build = Text.Create(buildStyle, Data.WIN_TITLE_STR)) == null)
             return;
-        build.setPosition(24.0f, 1056.0f);
+        /* A watermark belongs in the real screen corner on any aspect. */
+        build.place(Layout.SCREEN, Anchor.BOTTOM_LEFT, 24.0f, -20.0f);
         build.setColor(1.0f, 0.62f, 0.25f, 0.85f);
     }
 
@@ -89,7 +92,7 @@ public final class SceneMainMenu extends Scene {
     private static final String BLURB_STR = "Baked text: rasterized once " +
             "by Java2D at the exact pixel size it is shown at, then drawn " +
             "as a single quad. Kerning, tracking, and word wrapping come " +
-            "from a real text layout engine.\n\nSizes are in 1080p " +
-            "reference units, so this paragraph is native at every " +
-            "resolution.";
+            "from a real text layout engine.\n\nComposed on a 1920x1080 " +
+            "virtual canvas, so this layout is identical on every 16:9 " +
+            "screen.";
 }
