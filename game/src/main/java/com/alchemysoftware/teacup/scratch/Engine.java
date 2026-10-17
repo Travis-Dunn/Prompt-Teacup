@@ -1,5 +1,6 @@
 package com.alchemysoftware.teacup.scratch;
 
+import com.alchemysoftware.teacup.text.Text;
 import com.alchemysoftware.whitetail.audio.openal.AudioContext;
 import com.alchemysoftware.whitetail.error.ErrorHandler;
 import com.alchemysoftware.whitetail.error.RunFlag;
@@ -14,12 +15,13 @@ import com.alchemysoftware.whitetail.log.Logger;
 import com.alchemysoftware.whitetail.config.ConfigFileParser;
 import com.alchemysoftware.whitetail.window.Window;
 import com.alchemysoftware.whitetail.input.InputSys;
+import org.lwjgl.opengl.GL11;
 
 public final class Engine {
     private static boolean init, initGame;
     private static final int STAGE_NONE = 0, STAGE_LOGGER = 1, STAGE_WINDOW = 2,
     STAGE_INPUT_SYS = 3, STAGE_LWJGL_INPUT = 4, STAGE_RENDERER = 5,
-    STAGE_AUDIO = 6, STAGE_GC_PRIEST = 7, STAGE_SCENE = 8;
+    STAGE_TEXT = 6, STAGE_AUDIO = 7, STAGE_GC_PRIEST = 8, STAGE_SCENE = 9;
     private static int stage;
 
     static boolean Init() {
@@ -100,7 +102,9 @@ public final class Engine {
             return false;
         }
 
-        if (!(MasterRenderer.Init(Data.winW, Data.winH))) {
+        /* Window ignores the configured size in fullscreen; use what it
+           actually created. */
+        if (!(MasterRenderer.Init(Window.GetWidth(), Window.GetHeight()))) {
             ErrorHandler.LogFatalAndStop(ERR_STR_FAIL_MASTER_RENDERER);
             _Shutdown();
             return false;
@@ -117,6 +121,12 @@ public final class Engine {
             _Shutdown();
             return false;
         }
+
+        if (!Text.Init(Window.GetWidth(), Window.GetHeight())) {
+            ErrorHandler.LogFatalAndStop(ERR_STR_FAIL_TEXT);
+            _Shutdown();
+            return false;
+        } stage = STAGE_TEXT;
 
         if (!Timer.Init(0L)) {
             ErrorHandler.LogFatalAndStop(ERR_STR_FAIL_TIMER);
@@ -158,6 +168,9 @@ public final class Engine {
     }
 
     static boolean InitGame() {
+        if ((Data.fontMichroma = Text.LoadFont(Data.FONT_FOLDER,
+                Data.FONT_MICHROMA_FILENAME)) == null) return false;
+
         Data.mainMenuScene = new SceneMainMenu();
 
         SceneManager.RegisterScene(Data.MAIN_MENU_STR, Data.mainMenuScene);
@@ -193,8 +206,11 @@ public final class Engine {
     }
 
     static void Render() {
+        /* Blended UI drawn over last frame's pixels would accumulate. */
+        GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
         SceneManager.Render();
         MasterRenderer.Render();
+        Text.EndFrame();
         Window.SwapBuffers();
     }
 
@@ -210,6 +226,7 @@ public final class Engine {
         if (stage >= STAGE_SCENE)       SceneManager.Shutdown();
         if (stage >= STAGE_GC_PRIEST)   GCPriest.Shutdown();
         if (stage >= STAGE_AUDIO)       AudioContext.Shutdown();
+        if (stage >= STAGE_TEXT)        Text.Shutdown();
         if (stage >= STAGE_RENDERER)    MasterRenderer.Shutdown();
         if (stage >= STAGE_LWJGL_INPUT) LwjglInput.Shutdown();
         if (stage >= STAGE_INPUT_SYS)   InputSys.Shutdown();
@@ -245,6 +262,9 @@ public final class Engine {
             "initialize.\n";
     private static final String ERR_STR_FAIL_UI_RENDERER = CLASS +
             " failed to initialize because the ui renderer failed to " +
+            "initialize.\n";
+    private static final String ERR_STR_FAIL_TEXT = CLASS +
+            " failed to initialize because the text system failed to " +
             "initialize.\n";
     private static final String ERR_STR_FAIL_TIMER = CLASS +
             " failed to initialize because the timer failed to initialize.\n";
