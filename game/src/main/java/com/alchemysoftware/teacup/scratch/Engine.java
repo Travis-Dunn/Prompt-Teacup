@@ -1,5 +1,6 @@
 package com.alchemysoftware.teacup.scratch;
 
+import com.alchemysoftware.teacup.scenes.SceneMainMenu;
 import com.alchemysoftware.teacup.text.Text;
 import com.alchemysoftware.whitetail.audio.openal.AudioContext;
 import com.alchemysoftware.whitetail.error.ErrorHandler;
@@ -183,7 +184,7 @@ public final class Engine {
     }
 
     static void Run() {
-        assert(init);
+        assert(init && initGame);
 
         RunFlag.Start();
         while (RunFlag.IsRunning() && !Window.ShouldClose()) {

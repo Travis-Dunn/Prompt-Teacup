@@ -1,5 +1,6 @@
-package com.alchemysoftware.teacup.scratch;
+package com.alchemysoftware.teacup.scenes;
 
+import com.alchemysoftware.teacup.scratch.Data;
 import com.alchemysoftware.teacup.text.Label;
 import com.alchemysoftware.teacup.text.Text;
 import com.alchemysoftware.teacup.text.TextStyle;

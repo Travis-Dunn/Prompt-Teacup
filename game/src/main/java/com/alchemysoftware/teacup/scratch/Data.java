@@ -1,5 +1,6 @@
 package com.alchemysoftware.teacup.scratch;
 
+import com.alchemysoftware.teacup.scenes.SceneMainMenu;
 import com.alchemysoftware.whitetail.config.ConfigEntry;
 import com.alchemysoftware.whitetail.window.GLProfile;
 

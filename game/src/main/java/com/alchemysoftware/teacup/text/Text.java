@@ -72,6 +72,8 @@ public final class Text {
         assert !init : CLASS + ErrorStrings.ERR_STR_DOUBLE_INIT;
         assert fbW > 0 && fbH > 0 : ErrStrFramebuffer(fbW, fbH);
 
+        Logger.LogSession(LogLevel.DEBUG, " initializing...\n");
+
         if ((vs = ResourceStreamResolver.Get(SHADER_FOLDER, VERT_FILENAME))
                 == null) return false;
         if ((fs = ResourceStreamResolver.Get(SHADER_FOLDER, FRAG_FILENAME))
@@ -325,8 +327,8 @@ public final class Text {
     }
 
     private static final String SHADER_FOLDER = "shaders";
-    private static final String VERT_FILENAME = "text.vert";
-    private static final String FRAG_FILENAME = "text.frag";
+    private static final String VERT_FILENAME = "text_vert.glsl";
+    private static final String FRAG_FILENAME = "text_frag.glsl";
     private static final String UNIFORM_COLOR = "color";
     private static final String UNIFORM_TEX = "tex";
 
