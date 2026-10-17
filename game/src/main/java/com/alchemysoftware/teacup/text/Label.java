@@ -2,6 +2,9 @@ package com.alchemysoftware.teacup.text;
 
 import org.lwjgl.util.vector.Matrix4f;
 
+import com.alchemysoftware.teacup.layout.Anchor;
+import com.alchemysoftware.teacup.layout.Layout;
+import com.alchemysoftware.teacup.layout.Rect;
 import com.alchemysoftware.whitetail.renderer.ModelInstance;
 
 /**
@@ -10,12 +13,16 @@ import com.alchemysoftware.whitetail.renderer.ModelInstance;
  *
  * The position names the label's anchor point: on the first line's
  * baseline, at the left edge, center, or right edge of the text depending on
- * the style's alignment. Positions are in reference units.
+ * the style's alignment. Positions are in virtual pixels. place() positions
+ * the label by its text box instead.
  *
  * Position and color changes are free. setText() and setStyle() re-bake,
  * which allocates; treat them as load-time operations.
  */
 public final class Label {
+    /* Scratch for place(); Labels are single-threaded like the renderer. */
+    private static final Rect BOX = new Rect();
+
     /* Null once destroyed. */
     ModelInstance inst;
     TextMaterial mat;
@@ -65,8 +72,8 @@ public final class Label {
     }
 
     /**
-     * @param x anchor x in reference units
-     * @param y anchor y (first baseline) in reference units
+     * @param x anchor x in virtual pixels
+     * @param y anchor y (first baseline) in virtual pixels
      */
     public void setPosition(float x, float y) {
         assert inst != null : ERR_STR_DESTROYED;
@@ -74,6 +81,25 @@ public final class Label {
         this.x = x;
         this.y = y;
         updateMatrix();
+    }
+
+    /**
+     * Positions the label by its text box (getW() by getH()) instead of its
+     * anchor point. Computed once: call again after a re-bake if the box
+     * should stay pinned.
+     *
+     * @param parent the rectangle to position the box in
+     * @param a which point of the box to pin to the same point of parent
+     * @param dx offset in virtual pixels, +x right
+     * @param dy offset in virtual pixels, +y down
+     */
+    public void place(Rect parent, Anchor a, float dx, float dy) {
+        assert inst != null : ERR_STR_DESTROYED;
+
+        BOX.w = getW();
+        BOX.h = getH();
+        Layout.Place(BOX, parent, a, dx, dy);
+        setPosition(BOX.x + style.align.factor * BOX.w, BOX.y + getAscent());
     }
 
     /**
@@ -94,21 +120,21 @@ public final class Label {
     }
 
     /**
-     * @return width of the widest line in reference units
+     * @return width of the widest line in virtual pixels
      */
-    public float getW() { return boxW / Text.scale; }
+    public float getW() { return boxW / Layout.GetScale(); }
 
     /**
      * @return height from the first line's ascent to the last line's
-     *         descent, in reference units
+     *         descent, in virtual pixels
      */
-    public float getH() { return boxH / Text.scale; }
+    public float getH() { return boxH / Layout.GetScale(); }
 
     /**
      * @return distance from the top of the text box down to the first
-     *         baseline, in reference units
+     *         baseline, in virtual pixels
      */
-    public float getAscent() { return ascent / Text.scale; }
+    public float getAscent() { return ascent / Layout.GetScale(); }
 
     /* Snaps the texture to whole framebuffer pixels so each texel lands on
        exactly one pixel. */
@@ -117,8 +143,8 @@ public final class Label {
 
         m.m00 = texW;
         m.m11 = texH;
-        m.m30 = Math.round(x * Text.scale - anchorX);
-        m.m31 = Math.round(y * Text.scale - anchorY);
+        m.m30 = Math.round(Layout.ToPxX(x) - anchorX);
+        m.m31 = Math.round(Layout.ToPxY(y) - anchorY);
     }
 
     private static final String CLASS = Label.class.getSimpleName();

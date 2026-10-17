@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 
+import com.alchemysoftware.teacup.layout.Layout;
 import com.alchemysoftware.whitetail.error.ErrorHandler;
 import com.alchemysoftware.whitetail.error.ErrorStrings;
 import com.alchemysoftware.whitetail.log.LogLevel;
@@ -25,25 +26,20 @@ import com.alchemysoftware.whitetail.resource.ResourceStreamResolver;
  *
  * A label's text is rasterized once by Java2D into a texture at the exact
  * framebuffer pixel size it is shown at, then drawn each frame as one quad
- * through UIRenderer. Sizes and positions are in reference units: pixels on
- * a 1080-pixel-tall screen, scaled by framebuffer height, so text is drawn
- * natively at every resolution rather than stretched.
+ * through UIRenderer. Sizes and positions are in Layout's virtual pixels, so
+ * text is drawn natively at every resolution rather than stretched.
  *
  * Drawing allocates nothing. Creating, re-texting, and restyling a label
  * rasterize and allocate, so treat them as load-time operations. Label
  * materials are pooled, so creating and destroying labels does not grow
  * UIRenderer's per-material state past the peak live label count.
  *
- * Call Init() after the UI renderer is active and the resource resolver is
- * initialized, EndFrame() once per frame after MasterRenderer.Render(), and
- * Shutdown() before MasterRenderer.Shutdown(). Not thread-safe.
+ * Call Init() after Layout.Init(), once the UI renderer is active and the
+ * resource resolver is initialized; EndFrame() once per frame after
+ * MasterRenderer.Render(); and Shutdown() before MasterRenderer.Shutdown().
+ * Not thread-safe.
  */
 public final class Text {
-    /** Reference screen height that sizes and positions are expressed in. */
-    public static final float REF_H = 1080.0f;
-
-    static float scale;
-
     private static boolean init;
     private static ShaderProgram shader;
     private static ShaderUniform uniformColor;
@@ -61,18 +57,15 @@ public final class Text {
     private Text() {}
 
     /**
-     * @param fbW framebuffer width in pixels
-     * @param fbH framebuffer height in pixels
      * @return false after reporting a fatal error
      */
-    public static boolean Init(int fbW, int fbH) {
+    public static boolean Init() {
         InputStream vs, fs;
         ShaderUniform uniformTex;
 
         assert !init : CLASS + ErrorStrings.ERR_STR_DOUBLE_INIT;
-        assert fbW > 0 && fbH > 0 : ErrStrFramebuffer(fbW, fbH);
 
-        Logger.LogSession(LogLevel.DEBUG, " initializing...\n");
+        Logger.LogSession(LogLevel.DEBUG, CLASS + " initializing...\n");
 
         if ((vs = ResourceStreamResolver.Get(SHADER_FOLDER, VERT_FILENAME))
                 == null) return false;
@@ -120,11 +113,9 @@ public final class Text {
         texProps.wrapS = GLTexture.Wrap.CLAMP_TO_EDGE;
         texProps.wrapT = GLTexture.Wrap.CLAMP_TO_EDGE;
 
-        scale = fbH / REF_H;
         init = true;
 
-        Logger.LogSession(LogLevel.DEBUG, CLASS + " initialized [" + fbW +
-                "x" + fbH + ", scale " + scale + "].\n");
+        Logger.LogSession(LogLevel.DEBUG, CLASS + " initialized.\n");
         return true;
     }
 
@@ -274,7 +265,8 @@ public final class Text {
         GLTexture old = label.mat.texture;
         GLTexture texture;
 
-        if ((texture = Baker.Bake(label, scale, texProps)) == null)
+        if ((texture = Baker.Bake(label, Layout.GetScale(), texProps))
+                == null)
             return false;
 
         if (old != null) retired.add(old);
@@ -344,11 +336,6 @@ public final class Text {
     private static final String ERR_STR_CREATE_OOM = CLASS +
             " failed to create a label because an OutOfMemoryError was " +
             "encountered.\n";
-    private static String ErrStrFramebuffer(int w, int h) {
-        return CLASS + " failed to initialize because framebuffer width [" +
-                w + "] and height [" + h + "] must both be greater than " +
-                "zero.\n";
-    }
     private static String ErrStrLeak(int n) {
         return CLASS + " shut down with [" + n + "] labels never " +
                 "destroyed; destroying them now.\n";
