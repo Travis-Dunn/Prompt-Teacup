@@ -5,40 +5,32 @@ import com.alchemysoftware.teacup.layout.Layout;
 import com.alchemysoftware.teacup.layout.Rect;
 import com.alchemysoftware.teacup.text.Label;
 import com.alchemysoftware.teacup.text.Text;
-import com.alchemysoftware.whitetail.error.ErrorHandler;
 import com.alchemysoftware.whitetail.input.Button;
 import com.alchemysoftware.whitetail.input.InputSys;
 import com.alchemysoftware.whitetail.window.Window;
 
 /**
- * A text button that runs an action when clicked: pressed and released with
- * the left mouse button while over it. Dragging off before releasing
- * cancels the click.
+ * A text button. A click is a press and release of the left mouse button
+ * both over the button; dragging off before releasing cancels it.
  *
- * The owning scene calls input() from onInput() and draw() from
- * onRender() every frame it is active. Neither allocates. The action runs
- * inside input(); a scene transition requested there takes effect at the
- * next SceneManager.Update(), as usual.
+ * The owning scene calls clicked() from onInput() and draw() from
+ * onRender() every frame it is active, and acts on clicked() returning
+ * true. Neither allocates.
  *
  * Create and Destroy are load-time operations, like Text.Create and
  * Text.Destroy. Not thread-safe.
  */
 public final class MenuButton {
     private Label label;
-    private final String text;
     private final ButtonStyle style;
-    private final Runnable action;
     /* Clickable area, in virtual pixels. */
     private final Rect hit = new Rect();
     /* The current press started on this button. */
     private boolean armed;
 
-    private MenuButton(Label label, String text, ButtonStyle style,
-                       Runnable action) {
+    private MenuButton(Label label, ButtonStyle style) {
         this.label = label;
-        this.text = text;
         this.style = style;
-        this.action = action;
         hit.w = label.getW() + 2.0f * style.padX;
         hit.h = label.getH() + 2.0f * style.padY;
     }
@@ -46,19 +38,16 @@ public final class MenuButton {
     /**
      * @param style the button's look; kept by reference
      * @param text the label text
-     * @param action run once per click
      * @return the button at (0, 0), or null after reporting a fatal error
      */
-    public static MenuButton Create(ButtonStyle style, String text,
-                                    Runnable action) {
+    public static MenuButton Create(ButtonStyle style, String text) {
         Label label;
 
         assert style != null : ERR_STR_STYLE_NULL;
         assert style.text != null : ERR_STR_TEXT_STYLE_NULL;
-        assert action != null : ERR_STR_ACTION_NULL;
 
         if ((label = Text.Create(style.text, text)) == null) return null;
-        return new MenuButton(label, text, style, action);
+        return new MenuButton(label, style);
     }
 
     /**
@@ -89,27 +78,26 @@ public final class MenuButton {
     }
 
     /**
-     * Tracks the left mouse button and runs the action on a click. Call
-     * once per frame from the owning scene's onInput().
+     * Tracks the left mouse button. Call exactly once per frame from the
+     * owning scene's onInput(), including frames where the result is not
+     * needed; a skipped frame can miss the press or release. Beware
+     * short-circuiting: in a.clicked() || b.clicked(), b is skipped
+     * whenever a is clicked.
+     *
+     * @return true on the frame the button is clicked
      */
-    public void input() {
+    public boolean clicked() {
         boolean over, click;
 
         assert label != null : ERR_STR_DESTROYED;
 
         over = mouseOver();
         if (InputSys.WasPressed(Button.MOUSE_LEFT)) armed = over;
-        if (!InputSys.WasReleased(Button.MOUSE_LEFT)) return;
+        if (!InputSys.WasReleased(Button.MOUSE_LEFT)) return false;
 
         click = armed && over;
         armed = false;
-        if (!click) return;
-
-        try {
-            action.run();
-        } catch (RuntimeException e) {
-            ErrorHandler.LogFatalExcpAndStop(ErrStrAction(text), e);
-        }
+        return click;
     }
 
     /**
@@ -122,7 +110,7 @@ public final class MenuButton {
 
         assert label != null : ERR_STR_DESTROYED;
 
-        /* Hover is read fresh rather than kept from input(), so a scene
+        /* Hover is read fresh rather than kept from clicked(), so a scene
            entered this frame doesn't show last visit's state. A press
            that started elsewhere doesn't highlight buttons it drags over. */
         over = mouseOver();
@@ -158,14 +146,8 @@ public final class MenuButton {
     private static final String ERR_STR_TEXT_STYLE_NULL = CLASS +
             " failed to create a button because the style's text style " +
             "was null.\n";
-    private static final String ERR_STR_ACTION_NULL = CLASS +
-            " failed to create a button because the action was null.\n";
     private static final String ERR_STR_BUTTON_NULL = CLASS +
             " was given a null button.\n";
     private static final String ERR_STR_DESTROYED = CLASS +
             " was used after it was destroyed.\n";
-    private static String ErrStrAction(String text) {
-        return CLASS + " failed to run the action for [" + text + "] " +
-                "because it threw an exception.\n";
-    }
 }
