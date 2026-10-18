@@ -6,11 +6,14 @@ import com.alchemysoftware.teacup.scratch.Data;
 import com.alchemysoftware.teacup.text.Label;
 import com.alchemysoftware.teacup.text.Text;
 import com.alchemysoftware.teacup.text.TextStyle;
+import com.alchemysoftware.teacup.ui.MenuButton;
 import com.alchemysoftware.whitetail.event.Event;
 import com.alchemysoftware.whitetail.scene.Scene;
+import com.alchemysoftware.whitetail.scene.SceneManager;
 
 public final class SceneMainMenu extends Scene {
-    private Label title, blurb, build;
+    private Label title, build;
+    private MenuButton controls;
 
     @Override
     public void onInit() {
@@ -21,33 +24,25 @@ public final class SceneMainMenu extends Scene {
         titleStyle.lineSpacing = 1.0f;
         titleStyle.align = TextStyle.Align.CENTER;
 
-        TextStyle blurbStyle = new TextStyle();
-        blurbStyle.font = Data.fontMichroma;
-        blurbStyle.size = 22.0f;
-        blurbStyle.tracking = 0.02f;
-        blurbStyle.lineSpacing = 1.5f;
-        blurbStyle.wrapW = 1100.0f;
-        blurbStyle.align = TextStyle.Align.CENTER;
-
         TextStyle buildStyle = new TextStyle();
         buildStyle.font = Data.fontMichroma;
         buildStyle.size = 14.0f;
         buildStyle.lineSpacing = 1.0f;
         buildStyle.align = TextStyle.Align.LEFT;
 
-        if ((title = Text.Create(titleStyle, "PROMPT TEACUP")) == null) return;
-        title.place(Layout.CANVAS, Anchor.CENTER, 0.0f, -150.0f);
+        if ((title = Text.Create(titleStyle, TITLE_STR)) == null) return;
+        title.place(Layout.CANVAS, Anchor.CENTER, 0.0f, -90.0f);
         title.setColor(0.45f, 0.92f, 1.0f, 1.0f);
-
-        if ((blurb = Text.Create(blurbStyle, BLURB_STR)) == null) return;
-        blurb.place(Layout.CANVAS, Anchor.CENTER, 0.0f, 80.0f);
-        blurb.setColor(0.86f, 0.86f, 0.80f, 1.0f);
 
         if ((build = Text.Create(buildStyle, Data.WIN_TITLE_STR)) == null)
             return;
         /* A watermark belongs in the real screen corner on any aspect. */
         build.place(Layout.SCREEN, Anchor.BOTTOM_LEFT, 24.0f, -20.0f);
         build.setColor(1.0f, 0.62f, 0.25f, 0.85f);
+
+        if ((controls = MenuButton.Create(Data.menuButtonStyle,
+                CONTROLS_STR)) == null) return;
+        controls.place(Layout.CANVAS, Anchor.CENTER, 0.0f, 90.0f);
     }
 
     @Override
@@ -68,20 +63,20 @@ public final class SceneMainMenu extends Scene {
     @Override
     public void onRender() {
         Text.Draw(title);
-        Text.Draw(blurb);
         Text.Draw(build);
+        controls.draw();
     }
 
     @Override
     public void onInput() {
-
+        if (controls.clicked()) SceneManager.TransitionTo(Data.CONTROLS_STR);
     }
 
     @Override
     public void onDestroy() {
         if (title != null) Text.Destroy(title);
-        if (blurb != null) Text.Destroy(blurb);
         if (build != null) Text.Destroy(build);
+        if (controls != null) MenuButton.Destroy(controls);
     }
 
     @Override
@@ -89,10 +84,6 @@ public final class SceneMainMenu extends Scene {
         return false;
     }
 
-    private static final String BLURB_STR = "Baked text: rasterized once " +
-            "by Java2D at the exact pixel size it is shown at, then drawn " +
-            "as a single quad. Kerning, tracking, and word wrapping come " +
-            "from a real text layout engine.\n\nComposed on a 1920x1080 " +
-            "virtual canvas, so this layout is identical on every 16:9 " +
-            "screen.";
+    private static final String TITLE_STR = "PROMPT TEACUP";
+    private static final String CONTROLS_STR = "CONTROLS";
 }

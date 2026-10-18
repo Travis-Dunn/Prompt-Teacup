@@ -1,6 +1,7 @@
 package com.alchemysoftware.teacup.scratch;
 
 import com.alchemysoftware.teacup.layout.Layout;
+import com.alchemysoftware.teacup.scenes.SceneControls;
 import com.alchemysoftware.teacup.scenes.SceneMainMenu;
 import com.alchemysoftware.teacup.text.Text;
 import com.alchemysoftware.whitetail.audio.openal.AudioContext;
@@ -175,9 +176,13 @@ public final class Engine {
         if ((Data.fontMichroma = Text.LoadFont(Data.FONT_FOLDER,
                 Data.FONT_MICHROMA_FILENAME)) == null) return false;
 
+        Data.InitStyles();
+
         Data.mainMenuScene = new SceneMainMenu();
+        Data.controlsScene = new SceneControls();
 
         SceneManager.RegisterScene(Data.MAIN_MENU_STR, Data.mainMenuScene);
+        SceneManager.RegisterScene(Data.CONTROLS_STR, Data.controlsScene);
 
         SceneManager.InitScenes();
 
@@ -201,6 +206,8 @@ public final class Engine {
     static void Input() {
         Window.PollEvents();
         LwjglInput.Update();
+        /* Leaves the loop; Engine.Shutdown() then runs as on window close. */
+        if (InputSys.WasPressed(Data.KEY_QUIT)) RunFlag.Stop();
         SceneManager.Input();
     }
 

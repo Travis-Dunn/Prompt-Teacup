@@ -1,7 +1,11 @@
 package com.alchemysoftware.teacup.scratch;
 
+import com.alchemysoftware.teacup.scenes.SceneControls;
 import com.alchemysoftware.teacup.scenes.SceneMainMenu;
+import com.alchemysoftware.teacup.text.TextStyle;
+import com.alchemysoftware.teacup.ui.ButtonStyle;
 import com.alchemysoftware.whitetail.config.ConfigEntry;
+import com.alchemysoftware.whitetail.input.Button;
 import com.alchemysoftware.whitetail.window.GLProfile;
 
 import java.awt.Font;
@@ -112,8 +116,50 @@ public final class Data {
     public static final String FONT_MICHROMA_FILENAME = "Michroma-Regular.ttf";
     public static Font fontMichroma;
 
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Styles ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
+    public static ButtonStyle menuButtonStyle;
+
+    /**
+     * Builds the styles shared between scenes. Fonts must be loaded first.
+     */
+    public static void InitStyles() {
+        TextStyle text = new TextStyle();
+
+        text.font = fontMichroma;
+        text.size = 32.0f;
+        text.tracking = 0.1f;
+        text.lineSpacing = 1.0f;
+        text.align = TextStyle.Align.CENTER;
+
+        menuButtonStyle = new ButtonStyle();
+        menuButtonStyle.text = text;
+        menuButtonStyle.padX = 32.0f;
+        menuButtonStyle.padY = 16.0f;
+        Rgba(menuButtonStyle.idle, 0.55f, 0.60f, 0.62f, 1.0f);
+        Rgba(menuButtonStyle.hover, 0.45f, 0.92f, 1.0f, 1.0f);
+        Rgba(menuButtonStyle.down, 1.0f, 1.0f, 1.0f, 1.0f);
+    }
+
+    private static void Rgba(float[] c, float r, float g, float b, float a) {
+        c[0] = r;
+        c[1] = g;
+        c[2] = b;
+        c[3] = a;
+    }
+
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Controls ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
+    /* Keep each key and its on-screen name together so the Controls scene
+       can't drift from what the game actually does. */
+    public static final int KEY_QUIT = Button.KEY_ESCAPE;
+    public static final String KEY_QUIT_STR = "ESC";
+
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Scenes ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
     public static SceneMainMenu mainMenuScene;
     public static final String MAIN_MENU_STR = "main menu";
+
+    public static SceneControls controlsScene;
+    public static final String CONTROLS_STR = "controls";
 }
