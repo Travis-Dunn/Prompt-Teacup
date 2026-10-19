@@ -127,6 +127,10 @@ public final class Data {
     public static final String PANEL_FRAG_HEAD_FILENAME =
             "panel_frag_head.glsl";
     public static final String CONSTRUCT_FRAG_FILENAME = "construct_frag.glsl";
+    public static final String STARFIELD_VERT_FILENAME = "starfield_vert.glsl";
+    public static final String STARFIELD_FRAG_FILENAME = "starfield_frag.glsl";
+    public static final String HAZE_VERT_FILENAME = "haze_vert.glsl";
+    public static final String HAZE_FRAG_FILENAME = "haze_frag.glsl";
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Styles ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
