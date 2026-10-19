@@ -2,6 +2,7 @@ package com.alchemysoftware.teacup.scratch;
 
 import com.alchemysoftware.teacup.layout.Layout;
 import com.alchemysoftware.teacup.scenes.SceneControls;
+import com.alchemysoftware.teacup.scenes.SceneFlight;
 import com.alchemysoftware.teacup.scenes.SceneMainMenu;
 import com.alchemysoftware.teacup.starfield.Starfield;
 import com.alchemysoftware.teacup.text.Text;
@@ -191,9 +192,11 @@ public final class Engine {
 
         Data.mainMenuScene = new SceneMainMenu();
         Data.controlsScene = new SceneControls();
+        Data.flightScene = new SceneFlight();
 
         SceneManager.RegisterScene(Data.MAIN_MENU_STR, Data.mainMenuScene);
         SceneManager.RegisterScene(Data.CONTROLS_STR, Data.controlsScene);
+        SceneManager.RegisterScene(Data.FLIGHT_STR, Data.flightScene);
 
         SceneManager.InitScenes();
 
