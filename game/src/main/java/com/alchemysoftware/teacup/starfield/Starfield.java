@@ -12,7 +12,7 @@ import com.alchemysoftware.whitetail.error.ErrorStrings;
 import com.alchemysoftware.whitetail.image.Image;
 import com.alchemysoftware.whitetail.log.LogLevel;
 import com.alchemysoftware.whitetail.log.Logger;
-import com.alchemysoftware.whitetail.mesh.Mesh;
+import com.alchemysoftware.whitetail.renderer.GLInstanceBuffer;
 import com.alchemysoftware.whitetail.renderer.GLMesh;
 import com.alchemysoftware.whitetail.renderer.GLTexture;
 import com.alchemysoftware.whitetail.renderer.MasterRenderer;
@@ -63,12 +63,14 @@ public final class Starfield {
     private static ShaderUniform[] uStarOffsets;
     private static ShaderUniform uHazeFb, uHazeOrigin, uHazeScale,
             uHazeOffset, uHazeColor, uHazeBrightness, uHazeClumping;
+    /* Unit quad: the haze stretches it over the screen, every star is an
+       instance of it. */
     private static GLMesh quad;
     private static GLTexture.Properties hazeProps;
 
-    /* The current sky; stars is null when it has none. */
+    /* The current sky. */
     private static boolean built;
-    private static GLMesh stars;
+    private static GLInstanceBuffer stars;
     private static GLTexture haze;
     private static float hazeR, hazeG, hazeB, hazeBrightness, hazeClumping;
 
@@ -175,9 +177,7 @@ public final class Starfield {
      */
     public static boolean Build(StarfieldParams p) {
         long t0 = System.nanoTime();
-        Mesh mesh;
         Image image;
-        int count;
 
         assert init : CLASS + ErrorStrings.ERR_STR_NOT_INIT;
         assert p != null : ERR_STR_PARAMS_NULL;
@@ -191,13 +191,10 @@ public final class Starfield {
 
         Unbuild();
 
-        count = Generator.Count(p);
         try {
-            if (count > 0) {
-                if ((mesh = Generator.Stars(p)) == null) return false;
-                if ((stars = MasterRenderer.CreateMesh(mesh)) == null)
-                    return false;
-            }
+            if ((stars = MasterRenderer.CreateInstanceBuffer(
+                    Generator.LAYOUT, Generator.Stars(p))) == null)
+                return false;
             if ((image = Generator.Haze(p)) == null) return false;
             if ((haze = MasterRenderer.CreateTexture(image, hazeProps))
                     == null) return false;
@@ -214,7 +211,8 @@ public final class Starfield {
         built = true;
 
         Logger.LogSession(LogLevel.DEBUG, String.format("%s built a sky " +
-                "of [%d] stars from seed [%d] in [%.2f] ms.\n", CLASS, count,
+                "of [%d] stars from seed [%d] in [%.2f] ms.\n", CLASS,
+                stars.count,
                 p.seed, (System.nanoTime() - t0) / 1.0e6));
         return true;
     }
@@ -269,7 +267,7 @@ public final class Starfield {
                 quad.draw();
             }
 
-            if (stars != null) {
+            if (stars.count > 0) {
                 /* Light adds up: overlapping stars brighten. */
                 GL11.glEnable(GL11.GL_BLEND);
                 GL11.glBlendFunc(GL11.GL_ONE, GL11.GL_ONE);
@@ -285,7 +283,7 @@ public final class Starfield {
                             (float) Wrap(camX * PARALLAX[i], TILE),
                             (float) Wrap(camY * PARALLAX[i], TILE));
                 }
-                stars.draw();
+                quad.drawInstanced(stars);
             }
         } catch (RuntimeException e) {
             ErrorHandler.LogFatalExcpAndStop(ERR_STR_DRAW_EXCP, e);
@@ -315,7 +313,7 @@ public final class Starfield {
     }
 
     private static void Unbuild() {
-        if (stars != null) MasterRenderer.DestroyMesh(stars);
+        if (stars != null) MasterRenderer.DestroyInstanceBuffer(stars);
         if (haze != null) MasterRenderer.DestroyTexture(haze);
         stars = null;
         haze = null;

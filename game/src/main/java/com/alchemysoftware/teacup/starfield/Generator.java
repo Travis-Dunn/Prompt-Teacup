@@ -3,10 +3,9 @@ package com.alchemysoftware.teacup.starfield;
 import java.util.Random;
 
 import com.alchemysoftware.whitetail.image.Image;
-import com.alchemysoftware.whitetail.mesh.Mesh;
 
 /**
- * Builds a sky from StarfieldParams: one mesh holding every star of every
+ * Builds a sky from StarfieldParams: one instance record per star of every
  * layer, and a tileable haze noise image. Deterministic for a given seed.
  * Load-time only; allocates freely.
  */
@@ -48,15 +47,20 @@ final class Generator {
     private static final float[] HAZE_OCTAVE_WEIGHT =
             { 0.50f, 0.27f, 0.15f, 0.08f };
 
-    private static final int VERTS = 4, IDX = 6;
+    /* One instance record per star, as starfield_vert.glsl reads it:
+         x, y in the tile; layer
+         shape id; size in star pixels
+         r, g, b; brightness
+         galaxy angle; galaxy aspect */
+    static final int[] LAYOUT = { 3, 2, 4, 2 };
+    private static final int RECORD = 11;
 
     private Generator() {}
 
     /**
-     * @return how many stars of every kind p makes; Stars() needs at least
-     *         one
+     * @return how many stars of every kind p makes
      */
-    static int Count(StarfieldParams p) {
+    private static int Count(StarfieldParams p) {
         int total = p.heroStars + p.galaxies, layer;
 
         for (layer = 0; layer < Starfield.LAYERS; ++layer)
@@ -65,9 +69,9 @@ final class Generator {
     }
 
     /**
-     * @return a mesh of every star, or null after reporting a fatal error
+     * @return instance records for every star, LAYOUT per record
      */
-    static Mesh Stars(StarfieldParams p) {
+    static float[] Stars(StarfieldParams p) {
         Random rnd = new Random(p.seed);
         int[] counts = new int[Starfield.LAYERS];
         int layer, i, n;
@@ -117,8 +121,7 @@ final class Generator {
                     0.25f + 0.75f * rnd.nextFloat());
         }
 
-        return Mesh.Create(b.pos, b.normals, b.corner, b.shape, b.colors,
-                null, null, b.indices);
+        return b.data;
     }
 
     /**
@@ -187,62 +190,31 @@ final class Generator {
         return t * t * (3.0f - 2.0f * t);
     }
 
-    /* Appends one quad per star. Layout, per vertex:
-         pos      x, y in the tile; layer
-         normals  galaxy angle, galaxy aspect, unused
-         corner   0 or 1 in x and y
-         shape    shape id, size in star pixels
-         colors   r, g, b, brightness */
+    /* Appends one instance record per star. */
     private static final class Builder {
-        final float[] pos, normals, corner, shape, colors;
-        final int[] indices;
-        private int stars;
+        final float[] data;
+        private int at;
 
         Builder(int capacity) {
-            pos = new float[capacity * VERTS * Mesh.POS_STRIDE];
-            normals = new float[capacity * VERTS * Mesh.NORMAL_STRIDE];
-            corner = new float[capacity * VERTS * Mesh.TEX_COORD_STRIDE];
-            shape = new float[capacity * VERTS * Mesh.TEX_COORD_STRIDE];
-            colors = new float[capacity * VERTS * Mesh.COLOR_STRIDE];
-            indices = new int[capacity * IDX];
+            data = new float[capacity * RECORD];
         }
 
         void add(Random rnd, int layer, int shapeId, int size,
                  float bright, float tint, float angle, float aspect) {
-            float x = rnd.nextFloat() * Starfield.TILE;
-            float y = rnd.nextFloat() * Starfield.TILE;
-            float[] c = PALETTE[Pick(rnd)];
-            int v = stars * VERTS, k;
+            float[] c;
 
-            for (k = 0; k < VERTS; ++k) {
-                int vi = v + k;
-                Set3(pos, vi, x, y, layer);
-                Set3(normals, vi, angle, aspect, 0.0f);
-                corner[vi * 2] = k == 1 || k == 2 ? 1.0f : 0.0f;
-                corner[vi * 2 + 1] = k >= 2 ? 1.0f : 0.0f;
-                shape[vi * 2] = shapeId;
-                shape[vi * 2 + 1] = size;
-                colors[vi * 4] = 1.0f + (c[0] - 1.0f) * tint;
-                colors[vi * 4 + 1] = 1.0f + (c[1] - 1.0f) * tint;
-                colors[vi * 4 + 2] = 1.0f + (c[2] - 1.0f) * tint;
-                colors[vi * 4 + 3] = bright;
-            }
-
-            k = stars * IDX;
-            indices[k] = v;
-            indices[k + 1] = v + 3;
-            indices[k + 2] = v + 2;
-            indices[k + 3] = v;
-            indices[k + 4] = v + 2;
-            indices[k + 5] = v + 1;
-            ++stars;
-        }
-
-        private static void Set3(float[] a, int vi, float x, float y,
-                                 float z) {
-            a[vi * 3] = x;
-            a[vi * 3 + 1] = y;
-            a[vi * 3 + 2] = z;
+            data[at++] = rnd.nextFloat() * Starfield.TILE;
+            data[at++] = rnd.nextFloat() * Starfield.TILE;
+            data[at++] = layer;
+            data[at++] = shapeId;
+            data[at++] = size;
+            c = PALETTE[Pick(rnd)];
+            data[at++] = 1.0f + (c[0] - 1.0f) * tint;
+            data[at++] = 1.0f + (c[1] - 1.0f) * tint;
+            data[at++] = 1.0f + (c[2] - 1.0f) * tint;
+            data[at++] = bright;
+            data[at++] = angle;
+            data[at++] = aspect;
         }
 
         private static int Pick(Random rnd) {
