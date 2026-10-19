@@ -127,7 +127,8 @@ public final class Engine {
 
         Layout.Init(Window.GetWidth(), Window.GetHeight());
 
-        if (!Text.Init()) {
+        if (!Text.Init(Data.SHADER_FOLDER, Data.UI_VERT_FILENAME,
+                Data.TEXT_FRAG_FILENAME)) {
             ErrorHandler.LogFatalAndStop(ERR_STR_FAIL_TEXT);
             _Shutdown();
             return false;

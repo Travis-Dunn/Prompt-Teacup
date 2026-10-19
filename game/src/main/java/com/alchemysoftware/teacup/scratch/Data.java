@@ -117,9 +117,18 @@ public final class Data {
     public static final String FONT_MICHROMA_FILENAME = "Michroma-Regular.ttf";
     public static Font fontMichroma;
 
-/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Styles ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Shaders ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
+    public static final String SHADER_FOLDER = "shaders";
+    /* Shared by every UI quad: text and panels. */
+    public static final String UI_VERT_FILENAME = "ui_vert.glsl";
+    public static final String TEXT_FRAG_FILENAME = "text_frag.glsl";
+    /* Shared head of every panel style's fragment shader. */
+    public static final String PANEL_FRAG_HEAD_FILENAME =
+            "panel_frag_head.glsl";
     public static final String CONSTRUCT_FRAG_FILENAME = "construct_frag.glsl";
+
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Styles ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
     public static ButtonStyle menuButtonStyle;
     public static PanelStyle constructPanel;
@@ -151,8 +160,9 @@ public final class Data {
 
         /* Construct, "red october" theme. Pads cover the lean and the drop
            shadow, which reach past the panel rect. */
-        if ((constructPanel = PanelStyle.Load(CONSTRUCT_FRAG_FILENAME))
-                == null) return false;
+        if ((constructPanel = PanelStyle.Load(SHADER_FOLDER,
+                UI_VERT_FILENAME, PANEL_FRAG_HEAD_FILENAME,
+                CONSTRUCT_FRAG_FILENAME)) == null) return false;
         Rgb(constructPanel.colA, 0xc22f3b);
         Rgb(constructPanel.colB, 0xe8d6b0);
         Rgba(constructPanel.fill, 0x1c1416, 0.90f);

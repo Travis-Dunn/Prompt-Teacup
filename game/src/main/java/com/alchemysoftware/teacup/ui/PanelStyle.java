@@ -60,36 +60,38 @@ public final class PanelStyle {
     }
 
     /**
-     * @param fragFilename the style's fragment shader in the shaders folder;
-     *                     it is appended to the shared panel head
+     * @param folder resource folder holding all three shaders
+     * @param vertFilename vertex shader shared by UI quads
+     * @param headFilename fragment shader head shared by every panel style
+     * @param fragFilename the style's own fragment shader, appended to the
+     *                     head
      * @return the style, or null after reporting a fatal error
      */
-    public static PanelStyle Load(String fragFilename) {
+    public static PanelStyle Load(String folder, String vertFilename,
+                                  String headFilename, String fragFilename) {
         InputStream vs, hs, fs;
         ShaderProgram shader;
         ShaderUniform[] u;
         GLMesh quad;
         int i;
 
-        if ((vs = ResourceStreamResolver.Get(SHADER_FOLDER, VERT_FILENAME))
-                == null) return null;
-        if ((hs = ResourceStreamResolver.Get(SHADER_FOLDER, HEAD_FILENAME))
-                == null) {
-            Close(vs, VERT_FILENAME);
+        if ((vs = ResourceStreamResolver.Get(folder, vertFilename)) == null)
+            return null;
+        if ((hs = ResourceStreamResolver.Get(folder, headFilename)) == null) {
+            Close(vs, vertFilename);
             return null;
         }
-        if ((fs = ResourceStreamResolver.Get(SHADER_FOLDER, fragFilename))
-                == null) {
-            Close(vs, VERT_FILENAME);
-            Close(hs, HEAD_FILENAME);
+        if ((fs = ResourceStreamResolver.Get(folder, fragFilename)) == null) {
+            Close(vs, vertFilename);
+            Close(hs, headFilename);
             return null;
         }
 
         /* GLSL has no #include; the head and the style read as one file. */
         shader = MasterRenderer.CreateShaderProgram(vs,
                 new SequenceInputStream(hs, fs));
-        Close(vs, VERT_FILENAME);
-        Close(hs, HEAD_FILENAME);
+        Close(vs, vertFilename);
+        Close(hs, headFilename);
         Close(fs, fragFilename);
         if (shader == null) return null;
 
@@ -119,9 +121,6 @@ public final class PanelStyle {
         }
     }
 
-    private static final String SHADER_FOLDER = "shaders";
-    private static final String VERT_FILENAME = "ui_vert.glsl";
-    private static final String HEAD_FILENAME = "panel_frag_head.glsl";
     /* Order matches the constructor. Every style must use all of them. */
     private static final String[] UNIFORMS = { "size", "pad", "time",
             "seed", "aa", "state", "colA", "colB", "fill" };

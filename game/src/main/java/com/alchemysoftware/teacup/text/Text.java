@@ -57,9 +57,13 @@ public final class Text {
     private Text() {}
 
     /**
+     * @param folder resource folder holding both shaders
+     * @param vertFilename vertex shader
+     * @param fragFilename fragment shader
      * @return false after reporting a fatal error
      */
-    public static boolean Init() {
+    public static boolean Init(String folder, String vertFilename,
+                               String fragFilename) {
         InputStream vs, fs;
         ShaderUniform uniformTex;
 
@@ -67,16 +71,15 @@ public final class Text {
 
         Logger.LogSession(LogLevel.DEBUG, CLASS + " initializing...\n");
 
-        if ((vs = ResourceStreamResolver.Get(SHADER_FOLDER, VERT_FILENAME))
-                == null) return false;
-        if ((fs = ResourceStreamResolver.Get(SHADER_FOLDER, FRAG_FILENAME))
-                == null) {
-            Close(vs, VERT_FILENAME);
+        if ((vs = ResourceStreamResolver.Get(folder, vertFilename)) == null)
+            return false;
+        if ((fs = ResourceStreamResolver.Get(folder, fragFilename)) == null) {
+            Close(vs, vertFilename);
             return false;
         }
         shader = MasterRenderer.CreateShaderProgram(vs, fs);
-        Close(vs, VERT_FILENAME);
-        Close(fs, FRAG_FILENAME);
+        Close(vs, vertFilename);
+        Close(fs, fragFilename);
         if (shader == null) return false;
 
         if ((uniformColor = shader.getUniform(UNIFORM_COLOR)) == null ||
@@ -318,9 +321,6 @@ public final class Text {
         }
     }
 
-    private static final String SHADER_FOLDER = "shaders";
-    private static final String VERT_FILENAME = "ui_vert.glsl";
-    private static final String FRAG_FILENAME = "text_frag.glsl";
     private static final String UNIFORM_COLOR = "color";
     private static final String UNIFORM_TEX = "tex";
 
