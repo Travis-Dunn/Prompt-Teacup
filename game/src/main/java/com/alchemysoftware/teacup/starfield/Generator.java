@@ -162,7 +162,7 @@ final class Generator {
     }
 
     private static int LayerCount(StarfieldParams p, int layer) {
-        float area = Starfield.TILE * Starfield.TILE / 1.0e6f;
+        float area = Starfield.tile * Starfield.tile / 1.0e6f;
 
         return Math.round(p.density * STARS_PER_MPX * area *
                 LAYER_SHARE[layer]);
@@ -203,8 +203,8 @@ final class Generator {
                  float bright, float tint, float angle, float aspect) {
             float[] c;
 
-            data[at++] = rnd.nextFloat() * Starfield.TILE;
-            data[at++] = rnd.nextFloat() * Starfield.TILE;
+            data[at++] = Snap(rnd.nextFloat() * Starfield.tile);
+            data[at++] = Snap(rnd.nextFloat() * Starfield.tile);
             data[at++] = layer;
             data[at++] = shapeId;
             data[at++] = size;
@@ -215,6 +215,12 @@ final class Generator {
             data[at++] = bright;
             data[at++] = angle;
             data[at++] = aspect;
+        }
+
+        /* On the framebuffer pixel grid, so all stars of a layer share the
+           layer's sub-pixel phase. */
+        private static float Snap(float v) {
+            return Math.round(v * Starfield.scale) / Starfield.scale;
         }
 
         private static int Pick(Random rnd) {

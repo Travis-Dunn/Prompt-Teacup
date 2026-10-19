@@ -1,24 +1,38 @@
 #version 330 core
 
-/* Star shapes, evaluated at star-pixel centers so every star, however big,
-   is made of whole star pixels. Shape ids match Generator. Output is added
-   to what is behind. */
+/* A star is a grid of star pixels, each with a weight from its shape. A
+   framebuffer pixel receives each star pixel's light in proportion to how
+   much of it the framebuffer pixel covers: an exact box filter. On the grid,
+   that is the star pixel itself, crisp; between, it is shared, and the total
+   is unchanged. Light is shared in linear space, then encoded, so a star
+   split across pixels is as bright as one on a single pixel. Output is
+   added to what is behind. Shape ids match Generator. */
 
-in vec2 local;
+in vec2 fbPx;
+flat in vec2 corner;
 flat in float shape;
 flat in float size;
 flat in vec4 color;
 flat in vec2 galaxy;
 
+uniform float starPx;
+
 out vec4 fragColor;
 
 const float DOT = 0.0, BLOCK2 = 1.0, PLUS = 2.0, SOFT3 = 3.0, HERO = 4.0;
+const float GAMMA = 2.2;
 
-void main() {
+/* Weight of star pixel `cell`, 0 outside the star. */
+float weight(vec2 cell) {
+    vec2 q;
+    float r, w;
+
+    if (any(lessThan(cell, vec2(0.0))) ||
+        any(greaterThanEqual(cell, vec2(size)))) return 0.0;
+
     /* offset of this star pixel's center from the star's center */
-    vec2 q = floor(local) + 0.5 - 0.5 * size;
-    float r = length(q);
-    float w;
+    q = cell + 0.5 - 0.5 * size;
+    r = length(q);
 
     if (shape == DOT) {
         w = 1.0;
@@ -52,6 +66,21 @@ void main() {
         /* fade to nothing at the quad's edge */
         w *= clamp(1.0 - re / (0.5 * size), 0.0, 1.0);
     }
+    return pow(color.a * w, GAMMA);
+}
 
-    fragColor = vec4(color.rgb * color.a * w, 1.0);
+void main() {
+    /* this framebuffer pixel's span, in star pixels from the star's corner */
+    vec2 u0 = (fbPx - 0.5 - corner) / starPx;
+    vec2 u1 = u0 + 1.0 / starPx;
+    vec2 k = floor(u0);
+    /* fractions of this pixel lying in star pixel k and in k + 1 */
+    vec2 a = (min(u1, k + 1.0) - u0) * starPx;
+    vec2 b = max(u1 - (k + 1.0), 0.0) * starPx;
+    float lin = a.x * a.y * weight(k) +
+                b.x * a.y * weight(k + vec2(1.0, 0.0)) +
+                a.x * b.y * weight(k + vec2(0.0, 1.0)) +
+                b.x * b.y * weight(k + vec2(1.0, 1.0));
+
+    fragColor = vec4(color.rgb * pow(lin, 1.0 / GAMMA), 1.0);
 }

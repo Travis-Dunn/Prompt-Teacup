@@ -34,16 +34,27 @@ import com.alchemysoftware.whitetail.window.Window;
  * immediately, so call it from a scene's onRender(): everything submitted
  * to MasterRenderer draws after it and therefore in front.
  *
- * Stars are drawn in whole star pixels, one framebuffer pixel each at 1080p
- * and two at 4K, snapped to the pixel grid so they stay crisp. Drawing
- * allocates nothing; Build() is a load-time operation. Not thread-safe.
+ * Stars are made of whole star pixels, one framebuffer pixel each at 1080p
+ * and two at 4K, but move smoothly between framebuffer pixels: each pixel
+ * gets the share of light that falls on it, summed in linear light so a
+ * star's brightness holds steady as it glides. Stars of one layer share one
+ * sub-pixel phase, so a layer at rest on the pixel grid is crisp throughout.
+ * Drawing allocates nothing; Build() is a load-time operation. Not
+ * thread-safe.
  */
 public final class Starfield {
     /** Layers, far to near. */
     static final int LAYERS = 5;
-    /** Side of the square every layer wraps over, in virtual pixels;
-     *  larger than any screen, so no star shows twice. */
-    static final float TILE = 4096.0f;
+    /* Side of the square every layer wraps over, in virtual pixels; larger
+       than any screen, so no star shows twice. */
+    private static final float TILE_NOMINAL = 4096.0f;
+
+    /** Framebuffer pixels per virtual pixel, as of Init(). */
+    static float scale;
+    /** The wrap square actually used: TILE_NOMINAL rounded to a whole number
+     *  of framebuffer pixels, so wrapping never changes a star's sub-pixel
+     *  phase. Set by Init(). */
+    static float tile;
 
     /* Fraction of camera movement each layer follows, far to near, and the
        haze behind them all. */
@@ -59,7 +70,8 @@ public final class Starfield {
     private static float starPx;
 
     private static ShaderProgram starShader, hazeShader;
-    private static ShaderUniform uStarFb, uStarOrigin, uStarScale, uStarPx;
+    private static ShaderUniform uStarFb, uStarOrigin, uStarScale, uStarPx,
+            uStarTile;
     private static ShaderUniform[] uStarOffsets;
     private static ShaderUniform uHazeFb, uHazeOrigin, uHazeScale,
             uHazeOffset, uHazeColor, uHazeBrightness, uHazeClumping;
@@ -96,7 +108,9 @@ public final class Starfield {
 
         fbW = Window.GetWidth();
         fbH = Window.GetHeight();
-        starPx = Math.max(1, Math.round(Layout.GetScale()));
+        scale = Layout.GetScale();
+        tile = Math.round(TILE_NOMINAL * scale) / scale;
+        starPx = Math.max(1, Math.round(scale));
 
         if ((starShader = Load(folder, starVert, starFrag)) == null) {
             Release();
@@ -127,6 +141,7 @@ public final class Starfield {
                 (uStarOrigin = starShader.getUniform("origin")) == null ||
                 (uStarScale = starShader.getUniform("scale")) == null ||
                 (uStarPx = starShader.getUniform("starPx")) == null ||
+                (uStarTile = starShader.getUniform("tile")) == null ||
                 (uHazeFb = hazeShader.getUniform("fbSize")) == null ||
                 (uHazeOrigin = hazeShader.getUniform("origin")) == null ||
                 (uHazeScale = hazeShader.getUniform("scale")) == null ||
@@ -239,8 +254,9 @@ public final class Starfield {
         assert built : ERR_STR_NOT_BUILT;
 
         sc = Layout.GetScale();
-        ox = fbW * 0.5f;
-        oy = fbH * 0.5f;
+        /* whole pixels, so every star of a layer keeps the layer's phase */
+        ox = fbW / 2;
+        oy = fbH / 2;
 
         try {
             /* MasterRenderer sets its own state before each of its passes,
@@ -276,12 +292,13 @@ public final class Starfield {
                 starShader.setUniform2f(uStarOrigin, ox, oy);
                 starShader.setUniform1f(uStarScale, sc);
                 starShader.setUniform1f(uStarPx, starPx);
+                starShader.setUniform1f(uStarTile, tile);
                 /* Offsets are wrapped here in double precision, so the sky
                    never jitters however far the camera travels. */
                 for (i = 0; i < LAYERS; ++i) {
                     starShader.setUniform2f(uStarOffsets[i],
-                            (float) Wrap(camX * PARALLAX[i], TILE),
-                            (float) Wrap(camY * PARALLAX[i], TILE));
+                            (float) Wrap(camX * PARALLAX[i], tile),
+                            (float) Wrap(camY * PARALLAX[i], tile));
                 }
                 quad.drawInstanced(stars);
             }
