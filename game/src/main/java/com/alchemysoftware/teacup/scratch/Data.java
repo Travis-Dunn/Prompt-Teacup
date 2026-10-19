@@ -4,6 +4,7 @@ import com.alchemysoftware.teacup.scenes.SceneControls;
 import com.alchemysoftware.teacup.scenes.SceneMainMenu;
 import com.alchemysoftware.teacup.text.TextStyle;
 import com.alchemysoftware.teacup.ui.ButtonStyle;
+import com.alchemysoftware.teacup.ui.PanelStyle;
 import com.alchemysoftware.whitetail.config.ConfigEntry;
 import com.alchemysoftware.whitetail.input.Button;
 import com.alchemysoftware.whitetail.window.GLProfile;
@@ -116,15 +117,32 @@ public final class Data {
     public static final String FONT_MICHROMA_FILENAME = "Michroma-Regular.ttf";
     public static Font fontMichroma;
 
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Shaders ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
+    public static final String SHADER_FOLDER = "shaders";
+    /* Shared by every UI quad: text and panels. */
+    public static final String UI_VERT_FILENAME = "ui_vert.glsl";
+    public static final String TEXT_FRAG_FILENAME = "text_frag.glsl";
+    /* Shared head of every panel style's fragment shader. */
+    public static final String PANEL_FRAG_HEAD_FILENAME =
+            "panel_frag_head.glsl";
+    public static final String CONSTRUCT_FRAG_FILENAME = "construct_frag.glsl";
+
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Styles ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
     public static ButtonStyle menuButtonStyle;
+    public static PanelStyle constructPanel;
+    public static ButtonStyle constructButtonStyle;
 
     /**
-     * Builds the styles shared between scenes. Fonts must be loaded first.
+     * Builds the styles shared between scenes. Fonts must be loaded, and the
+     * UI renderer active, first.
+     *
+     * @return false after reporting a fatal error
      */
-    public static void InitStyles() {
+    public static boolean InitStyles() {
         TextStyle text = new TextStyle();
+        TextStyle constructText = new TextStyle();
 
         text.font = fontMichroma;
         text.size = 32.0f;
@@ -136,15 +154,49 @@ public final class Data {
         menuButtonStyle.text = text;
         menuButtonStyle.padX = 32.0f;
         menuButtonStyle.padY = 16.0f;
-        Rgba(menuButtonStyle.idle, 0.55f, 0.60f, 0.62f, 1.0f);
-        Rgba(menuButtonStyle.hover, 0.45f, 0.92f, 1.0f, 1.0f);
-        Rgba(menuButtonStyle.down, 1.0f, 1.0f, 1.0f, 1.0f);
+        Rgba(menuButtonStyle.idle, 0x8c999e, 1.0f);
+        Rgba(menuButtonStyle.hover, 0x73ebff, 1.0f);
+        Rgba(menuButtonStyle.down, 0xffffff, 1.0f);
+
+        /* Construct, "red october" theme. Pads cover the lean and the drop
+           shadow, which reach past the panel rect. */
+        if ((constructPanel = PanelStyle.Load(SHADER_FOLDER,
+                UI_VERT_FILENAME, PANEL_FRAG_HEAD_FILENAME,
+                CONSTRUCT_FRAG_FILENAME)) == null) return false;
+        Rgb(constructPanel.colA, 0xc22f3b);
+        Rgb(constructPanel.colB, 0xe8d6b0);
+        Rgba(constructPanel.fill, 0x1c1416, 0.90f);
+        constructPanel.padX = 20.25f;
+        constructPanel.padY = 13.5f;
+
+        constructText.font = fontMichroma;
+        constructText.size = 26.0f;
+        constructText.tracking = 0.1f;
+        constructText.lineSpacing = 1.0f;
+        constructText.align = TextStyle.Align.LEFT;
+
+        constructButtonStyle = new ButtonStyle();
+        constructButtonStyle.text = constructText;
+        constructButtonStyle.panel = constructPanel;
+        constructButtonStyle.padX = 22.5f;
+        constructButtonStyle.padY = 13.0f;
+        constructButtonStyle.minW = 328.5f;
+        /* Hover floods the slab with accent A, so the label goes dark. */
+        Rgba(constructButtonStyle.idle, 0xe8d6b0, 1.0f);
+        Rgba(constructButtonStyle.hover, 0x14090b, 1.0f);
+        Rgba(constructButtonStyle.down, 0x14090b, 1.0f);
+
+        return true;
     }
 
-    private static void Rgba(float[] c, float r, float g, float b, float a) {
-        c[0] = r;
-        c[1] = g;
-        c[2] = b;
+    private static void Rgb(float[] c, int rgb) {
+        c[0] = ((rgb >> 16) & 0xff) / 255.0f;
+        c[1] = ((rgb >> 8) & 0xff) / 255.0f;
+        c[2] = (rgb & 0xff) / 255.0f;
+    }
+
+    private static void Rgba(float[] c, int rgb, float a) {
+        Rgb(c, rgb);
         c[3] = a;
     }
 

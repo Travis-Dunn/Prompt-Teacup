@@ -79,7 +79,7 @@ public final class SceneControls extends Scene {
 
     @Override
     public void onEnter() {
-
+        back.reset();
     }
 
     @Override
