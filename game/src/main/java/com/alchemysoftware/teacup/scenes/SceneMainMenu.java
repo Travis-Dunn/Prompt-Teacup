@@ -1,5 +1,6 @@
 package com.alchemysoftware.teacup.scenes;
 
+import com.alchemysoftware.teacup.game.Game;
 import com.alchemysoftware.teacup.layout.Anchor;
 import com.alchemysoftware.teacup.layout.Layout;
 import com.alchemysoftware.teacup.scratch.Data;
@@ -19,7 +20,7 @@ public final class SceneMainMenu extends Scene {
     private static final double DRIFT_X = 24.0, DRIFT_Y = 9.0;
 
     private Label title, build;
-    private MenuButton controls;
+    private MenuButton play, controls;
     private final StarfieldParams sky = new StarfieldParams();
     private double camX, camY;
 
@@ -59,15 +60,20 @@ public final class SceneMainMenu extends Scene {
         build.place(Layout.SCREEN, Anchor.BOTTOM_LEFT, 24.0f, -20.0f);
         build.setColor(1.0f, 0.62f, 0.25f, 0.85f);
 
+        if ((play = MenuButton.Create(Data.constructButtonStyle, PLAY_STR))
+                == null) return;
+        play.place(Layout.CANVAS, Anchor.CENTER, 0.0f, 60.0f);
+
         if ((controls = MenuButton.Create(Data.constructButtonStyle,
                 CONTROLS_STR)) == null) return;
-        controls.place(Layout.CANVAS, Anchor.CENTER, 0.0f, 90.0f);
+        controls.place(Layout.CANVAS, Anchor.CENTER, 0.0f, 150.0f);
     }
 
     @Override
     public void onEnter() {
         /* Other places build their own skies, so rebuild on every visit. */
         Starfield.Build(sky);
+        play.reset();
         controls.reset();
     }
 
@@ -88,11 +94,16 @@ public final class SceneMainMenu extends Scene {
         Starfield.Draw();
         Text.Draw(title);
         Text.Draw(build);
+        play.draw();
         controls.draw();
     }
 
     @Override
     public void onInput() {
+        if (play.clicked()) {
+            Data.game = Game.New();
+            SceneManager.TransitionTo(Data.FLIGHT_STR);
+        }
         if (controls.clicked()) SceneManager.TransitionTo(Data.CONTROLS_STR);
     }
 
@@ -100,6 +111,7 @@ public final class SceneMainMenu extends Scene {
     public void onDestroy() {
         if (title != null) Text.Destroy(title);
         if (build != null) Text.Destroy(build);
+        if (play != null) MenuButton.Destroy(play);
         if (controls != null) MenuButton.Destroy(controls);
     }
 
@@ -109,5 +121,6 @@ public final class SceneMainMenu extends Scene {
     }
 
     private static final String TITLE_STR = "PROMPT TEACUP";
+    private static final String PLAY_STR = "PLAY";
     private static final String CONTROLS_STR = "CONTROLS";
 }

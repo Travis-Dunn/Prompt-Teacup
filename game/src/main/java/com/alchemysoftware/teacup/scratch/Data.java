@@ -1,6 +1,8 @@
 package com.alchemysoftware.teacup.scratch;
 
+import com.alchemysoftware.teacup.game.Game;
 import com.alchemysoftware.teacup.scenes.SceneControls;
+import com.alchemysoftware.teacup.scenes.SceneFlight;
 import com.alchemysoftware.teacup.scenes.SceneMainMenu;
 import com.alchemysoftware.teacup.text.TextStyle;
 import com.alchemysoftware.teacup.ui.ButtonStyle;
@@ -218,4 +220,12 @@ public final class Data {
 
     public static SceneControls controlsScene;
     public static final String CONTROLS_STR = "controls";
+
+    public static SceneFlight flightScene;
+    public static final String FLIGHT_STR = "flight";
+
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Game ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
+    /* The playthrough in progress; null until the player presses PLAY. */
+    public static Game game;
 }
