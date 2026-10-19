@@ -319,7 +319,7 @@ public final class Text {
     }
 
     private static final String SHADER_FOLDER = "shaders";
-    private static final String VERT_FILENAME = "text_vert.glsl";
+    private static final String VERT_FILENAME = "ui_vert.glsl";
     private static final String FRAG_FILENAME = "text_frag.glsl";
     private static final String UNIFORM_COLOR = "color";
     private static final String UNIFORM_TEX = "tex";

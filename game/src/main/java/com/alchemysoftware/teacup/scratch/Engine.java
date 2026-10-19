@@ -176,7 +176,7 @@ public final class Engine {
         if ((Data.fontMichroma = Text.LoadFont(Data.FONT_FOLDER,
                 Data.FONT_MICHROMA_FILENAME)) == null) return false;
 
-        Data.InitStyles();
+        if (!Data.InitStyles()) return false;
 
         Data.mainMenuScene = new SceneMainMenu();
         Data.controlsScene = new SceneControls();

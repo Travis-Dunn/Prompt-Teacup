@@ -40,14 +40,14 @@ public final class SceneMainMenu extends Scene {
         build.place(Layout.SCREEN, Anchor.BOTTOM_LEFT, 24.0f, -20.0f);
         build.setColor(1.0f, 0.62f, 0.25f, 0.85f);
 
-        if ((controls = MenuButton.Create(Data.menuButtonStyle,
+        if ((controls = MenuButton.Create(Data.constructButtonStyle,
                 CONTROLS_STR)) == null) return;
         controls.place(Layout.CANVAS, Anchor.CENTER, 0.0f, 90.0f);
     }
 
     @Override
     public void onEnter() {
-
+        controls.reset();
     }
 
     @Override

@@ -5,33 +5,45 @@ import com.alchemysoftware.teacup.layout.Layout;
 import com.alchemysoftware.teacup.layout.Rect;
 import com.alchemysoftware.teacup.text.Label;
 import com.alchemysoftware.teacup.text.Text;
+import com.alchemysoftware.teacup.text.TextStyle;
 import com.alchemysoftware.whitetail.input.Button;
 import com.alchemysoftware.whitetail.input.InputSys;
+import com.alchemysoftware.whitetail.timer.Timer;
 import com.alchemysoftware.whitetail.window.Window;
 
 /**
- * A text button. A click is a press and release of the left mouse button
- * both over the button; dragging off before releasing cancels it.
+ * A text button, optionally on a panel. A click is a press and release of
+ * the left mouse button both over the button; dragging off before releasing
+ * cancels it.
  *
  * The owning scene calls clicked() from onInput() and draw() from
- * onRender() every frame it is active, and acts on clicked() returning
- * true. Neither allocates.
+ * onRender() every frame it is active, acts on clicked() returning true,
+ * and calls reset() from onEnter(). Neither clicked() nor draw()
+ * allocates.
  *
  * Create and Destroy are load-time operations, like Text.Create and
  * Text.Destroy. Not thread-safe.
  */
 public final class MenuButton {
+    /* Seconds for the hover highlight to fade fully in, and fully out. */
+    private static final float HOVER_IN = 0.10f, HOVER_OUT = 0.22f;
+
     private Label label;
+    /* Null for a bare label. */
+    private final Panel panel;
     private final ButtonStyle style;
-    /* Clickable area, in virtual pixels. */
+    /* Clickable area, in virtual pixels; also the panel rect. */
     private final Rect hit = new Rect();
     /* The current press started on this button. */
     private boolean armed;
+    /* Hover highlight, 0 to 1, eased toward the mouse state. */
+    private float hover;
 
-    private MenuButton(Label label, ButtonStyle style) {
+    private MenuButton(Label label, Panel panel, ButtonStyle style) {
         this.label = label;
+        this.panel = panel;
         this.style = style;
-        hit.w = label.getW() + 2.0f * style.padX;
+        hit.w = Math.max(style.minW, label.getW() + 2.0f * style.padX);
         hit.h = label.getH() + 2.0f * style.padY;
     }
 
@@ -42,12 +54,15 @@ public final class MenuButton {
      */
     public static MenuButton Create(ButtonStyle style, String text) {
         Label label;
+        Panel panel = null;
 
         assert style != null : ERR_STR_STYLE_NULL;
         assert style.text != null : ERR_STR_TEXT_STYLE_NULL;
 
+        if (style.panel != null &&
+                (panel = Panel.Create(style.panel)) == null) return null;
         if ((label = Text.Create(style.text, text)) == null) return null;
-        return new MenuButton(label, style);
+        return new MenuButton(label, panel, style);
     }
 
     /**
@@ -62,8 +77,8 @@ public final class MenuButton {
     }
 
     /**
-     * Positions the clickable area (the label's box plus padding) and
-     * centers the label in it.
+     * Positions the button and places the label in it according to the
+     * label's alignment.
      *
      * @param parent the rectangle to position the button in
      * @param a which point of the button to pin to the same point of parent
@@ -71,10 +86,30 @@ public final class MenuButton {
      * @param dy offset in virtual pixels, +y down
      */
     public void place(Rect parent, Anchor a, float dx, float dy) {
+        TextStyle.Align align = style.text.align;
+
         assert label != null : ERR_STR_DESTROYED;
 
         Layout.Place(hit, parent, a, dx, dy);
-        label.place(hit, Anchor.CENTER, 0.0f, 0.0f);
+        if (align == TextStyle.Align.LEFT)
+            label.place(hit, Anchor.LEFT, style.padX, 0.0f);
+        else if (align == TextStyle.Align.RIGHT)
+            label.place(hit, Anchor.RIGHT, -style.padX, 0.0f);
+        else label.place(hit, Anchor.CENTER, 0.0f, 0.0f);
+        if (panel != null) panel.setRect(hit);
+    }
+
+    /**
+     * Snaps the hover highlight to the current mouse state and forgets any
+     * press in progress. Call from the owning scene's onEnter(), so a scene
+     * doesn't fade out a highlight left over from its last visit.
+     */
+    public void reset() {
+        assert label != null : ERR_STR_DESTROYED;
+
+        armed = false;
+        hover = mouseOver() && !InputSys.IsDown(Button.MOUSE_LEFT)
+                ? 1.0f : 0.0f;
     }
 
     /**
@@ -101,24 +136,43 @@ public final class MenuButton {
     }
 
     /**
-     * Tints the label for the current mouse state and queues it. Call once
-     * per frame from the owning scene's onRender().
+     * Eases the hover highlight, tints the label, and queues the panel and
+     * label. Call once per frame from the owning scene's onRender().
      */
     public void draw() {
-        boolean over;
-        float[] c;
+        boolean over, down, lit;
+        float dt, t;
+        float[] c0, c1;
 
         assert label != null : ERR_STR_DESTROYED;
 
-        /* Hover is read fresh rather than kept from clicked(), so a scene
-           entered this frame doesn't show last visit's state. A press
-           that started elsewhere doesn't highlight buttons it drags over. */
+        /* A press that started elsewhere doesn't highlight buttons it drags
+           over; dragging off a pressed button unlights it. */
         over = mouseOver();
-        if (armed) c = over ? style.down : style.idle;
-        else c = over && !InputSys.IsDown(Button.MOUSE_LEFT)
-                ? style.hover : style.idle;
+        down = armed && over;
+        lit = armed ? over : over && !InputSys.IsDown(Button.MOUSE_LEFT);
 
-        label.setColor(c[0], c[1], c[2], c[3]);
+        dt = (float) Timer.GetDt();
+        hover = lit ? Math.min(1.0f, hover + dt / HOVER_IN)
+                : Math.max(0.0f, hover - dt / HOVER_OUT);
+
+        if (down) {
+            c0 = c1 = style.down;
+            t = 1.0f;
+        } else {
+            c0 = style.idle;
+            c1 = style.hover;
+            t = hover;
+        }
+        label.setColor(c0[0] + (c1[0] - c0[0]) * t,
+                c0[1] + (c1[1] - c0[1]) * t,
+                c0[2] + (c1[2] - c0[2]) * t,
+                c0[3] + (c1[3] - c0[3]) * t);
+
+        if (panel != null) {
+            panel.setState(hover, down ? 1.0f : 0.0f);
+            panel.draw();
+        }
         Text.Draw(label);
     }
 
