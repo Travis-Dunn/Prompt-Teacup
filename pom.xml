@@ -27,7 +27,7 @@
 
         <lwjgl.version>2.9.3</lwjgl.version>
 
-        <whitetail.version>0.1.11</whitetail.version>
+        <whitetail.version>0.1.12</whitetail.version>
 
         <maven.compiler.source>1.7</maven.compiler.source>
         <maven.compiler.target>1.7</maven.compiler.target>

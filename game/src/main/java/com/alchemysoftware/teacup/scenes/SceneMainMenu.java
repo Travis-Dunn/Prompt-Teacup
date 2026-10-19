@@ -3,6 +3,8 @@ package com.alchemysoftware.teacup.scenes;
 import com.alchemysoftware.teacup.layout.Anchor;
 import com.alchemysoftware.teacup.layout.Layout;
 import com.alchemysoftware.teacup.scratch.Data;
+import com.alchemysoftware.teacup.starfield.Starfield;
+import com.alchemysoftware.teacup.starfield.StarfieldParams;
 import com.alchemysoftware.teacup.text.Label;
 import com.alchemysoftware.teacup.text.Text;
 import com.alchemysoftware.teacup.text.TextStyle;
@@ -12,11 +14,28 @@ import com.alchemysoftware.whitetail.scene.Scene;
 import com.alchemysoftware.whitetail.scene.SceneManager;
 
 public final class SceneMainMenu extends Scene {
+    /* The menu's sky drifts on its own, in virtual pixels per second at
+       full parallax; in flight the camera follows the player instead. */
+    private static final double DRIFT_X = 24.0, DRIFT_Y = 9.0;
+
     private Label title, build;
     private MenuButton controls;
+    private final StarfieldParams sky = new StarfieldParams();
+    private double camX, camY;
 
     @Override
     public void onInit() {
+        /* Literals until systems exist and supply their own. */
+        sky.seed = 0x7EAC5L;
+        sky.density = 1.0f;
+        sky.heroStars = 7;
+        sky.galaxies = 4;
+        sky.hazeColor[0] = 0.32f;
+        sky.hazeColor[1] = 0.22f;
+        sky.hazeColor[2] = 0.46f;
+        sky.hazeBrightness = 0.05f;
+        sky.hazeClumping = 0.7f;
+
         TextStyle titleStyle = new TextStyle();
         titleStyle.font = Data.fontMichroma;
         titleStyle.size = 88.0f;
@@ -47,6 +66,8 @@ public final class SceneMainMenu extends Scene {
 
     @Override
     public void onEnter() {
+        /* Other places build their own skies, so rebuild on every visit. */
+        Starfield.Build(sky);
         controls.reset();
     }
 
@@ -57,11 +78,14 @@ public final class SceneMainMenu extends Scene {
 
     @Override
     public void onUpdate(double v) {
-
+        camX += DRIFT_X * v;
+        camY += DRIFT_Y * v;
+        Starfield.SetCamera(camX, camY);
     }
 
     @Override
     public void onRender() {
+        Starfield.Draw();
         Text.Draw(title);
         Text.Draw(build);
         controls.draw();

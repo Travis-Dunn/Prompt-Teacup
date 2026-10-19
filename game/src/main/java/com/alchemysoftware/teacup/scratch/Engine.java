@@ -3,6 +3,7 @@ package com.alchemysoftware.teacup.scratch;
 import com.alchemysoftware.teacup.layout.Layout;
 import com.alchemysoftware.teacup.scenes.SceneControls;
 import com.alchemysoftware.teacup.scenes.SceneMainMenu;
+import com.alchemysoftware.teacup.starfield.Starfield;
 import com.alchemysoftware.teacup.text.Text;
 import com.alchemysoftware.whitetail.audio.openal.AudioContext;
 import com.alchemysoftware.whitetail.error.ErrorHandler;
@@ -24,7 +25,8 @@ public final class Engine {
     private static boolean init, initGame;
     private static final int STAGE_NONE = 0, STAGE_LOGGER = 1, STAGE_WINDOW = 2,
     STAGE_INPUT_SYS = 3, STAGE_LWJGL_INPUT = 4, STAGE_RENDERER = 5,
-    STAGE_TEXT = 6, STAGE_AUDIO = 7, STAGE_GC_PRIEST = 8, STAGE_SCENE = 9;
+    STAGE_TEXT = 6, STAGE_STARFIELD = 7, STAGE_AUDIO = 8, STAGE_GC_PRIEST = 9,
+    STAGE_SCENE = 10;
     private static int stage;
 
     static boolean Init() {
@@ -134,6 +136,14 @@ public final class Engine {
             return false;
         } stage = STAGE_TEXT;
 
+        if (!Starfield.Init(Data.SHADER_FOLDER, Data.STARFIELD_VERT_FILENAME,
+                Data.STARFIELD_FRAG_FILENAME, Data.HAZE_VERT_FILENAME,
+                Data.HAZE_FRAG_FILENAME)) {
+            ErrorHandler.LogFatalAndStop(ERR_STR_FAIL_STARFIELD);
+            _Shutdown();
+            return false;
+        } stage = STAGE_STARFIELD;
+
         if (!Timer.Init(0L)) {
             ErrorHandler.LogFatalAndStop(ERR_STR_FAIL_TIMER);
             _Shutdown();
@@ -238,6 +248,7 @@ public final class Engine {
         if (stage >= STAGE_SCENE)       SceneManager.Shutdown();
         if (stage >= STAGE_GC_PRIEST)   GCPriest.Shutdown();
         if (stage >= STAGE_AUDIO)       AudioContext.Shutdown();
+        if (stage >= STAGE_STARFIELD)   Starfield.Shutdown();
         if (stage >= STAGE_TEXT)        Text.Shutdown();
         if (stage >= STAGE_RENDERER)    MasterRenderer.Shutdown();
         if (stage >= STAGE_LWJGL_INPUT) LwjglInput.Shutdown();
@@ -277,6 +288,9 @@ public final class Engine {
             "initialize.\n";
     private static final String ERR_STR_FAIL_TEXT = CLASS +
             " failed to initialize because the text system failed to " +
+            "initialize.\n";
+    private static final String ERR_STR_FAIL_STARFIELD = CLASS +
+            " failed to initialize because the star field failed to " +
             "initialize.\n";
     private static final String ERR_STR_FAIL_TIMER = CLASS +
             " failed to initialize because the timer failed to initialize.\n";
