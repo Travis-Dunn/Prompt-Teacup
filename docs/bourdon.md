@@ -1,7 +1,5 @@
 # Bourdon
 
-Dev reference. Does not ship. The point of this document is to keep the Bourdon consistent with the rest of the world as the world gets built. Anything marked **open** has not been decided, and should not be treated as canon until it is.
-
 | | |
 |---|---|
 | Name | Bourdon (French: bumblebee) |
@@ -12,7 +10,10 @@ Dev reference. Does not ship. The point of this document is to keep the Bourdon 
 | Crew | One. No passengers, ever. |
 | Range | One jump. The shortest range of any ship in the game. |
 | Weapons | One small defensive blaster turret, on top. No other mounts. |
-| Stock livery | Yellow body, black shield generator, bare aluminum struts, amber lights |
+| Pressurized cargo | false |
+| Gravity | false |
+| Atmospheric flight | false |
+| Stock livery | Yellow body, black shield generator, bare aluminum struts, amber lights, blue exhaust |
 
 ## Summary
 
@@ -45,28 +46,14 @@ It should look like an honest piece of 1970s engineering, not a pile of greebles
 
 ## Layout
 
-Top view, nose up, not to scale.
-
-```
-              ___
-            /▓    \  oo ▮       crew sphere: canopy on the left, equipment on the right
-            \_____/
-            /  |  \             3-4 struts across an open gap
-        ┌─────────────┐         front cap / cargo door, hinged on the right
-      █ │             │ █
-      █ │    (T)      │ █       cargo cylinder, turret on top
-      █ │             │ █
-      █ └─────────────┘ █
-      ███████████████████       black U-shaped shield generator, sides and rear
-           ═══════              upper impulse engine (the lower one is hidden beneath)
-```
+From front to back: crew sphere, struts across an open gap, then the cargo cylinder, wrapped on the sides and rear by the shield generator, with the impulse engines at the aft end.
 
 ### Crew sphere
 
 - One pilot. Left-hand drive, so the pilot sits on the left (port) side.
 - The canopy is a smooth, flush bubble on the pilot's side only. Not faceted. The rest of the sphere is opaque yellow.
 - Strapped to the outside of the right (starboard) side: spherical gas bottles, a flat radiator panel, and an amber beacon. This is what keeps the silhouette asymmetrical.
-- The sphere is self-contained, and doubles as a lifeboat. It can detach from the rest of the ship entirely. It carries life support and the beacon. Whether it can manoeuvre on its own is **open**.
+- The sphere can detach from the rest of the ship entirely. It is a lifeboat at most: it carries life support and the beacon, and cannot manoeuvre on its own. Once ejected, it drifts until someone picks it up.
 
 ### Struts and the gap
 
@@ -83,7 +70,7 @@ Top view, nose up, not to scale.
 ### Cargo cylinder
 
 - Unpressurized. Carries a small but meaningful amount of cargo.
-- The super-luminal drive is somewhere in the hull, and is never shown. Its workings are never explained.
+- The super-luminal drive is somewhere in the hull, aft of the hold, and is never shown. Its workings are never explained.
 - The defensive blaster turret sits on top of the cylinder.
 
 ### Shield generator
@@ -96,11 +83,31 @@ Top view, nose up, not to scale.
 
 - Two small, horizontal, linear engines at the aft end. One sits above the shield generator, one below.
 - They are small, and the ship is sluggish.
-- Exhaust glow is amber.
+- Exhaust glow is electric blue, leaning slightly violet - roughly the complement of the amber lights and the yellow hull (hue around 225°, e.g. `#3F6BFF`). The colour is chosen for contrast, not for any engineering reason.
+
+## Size and mass
+
+Approximate. These are physical reference figures for modelling and writing, not game stats.
+
+| | |
+|---|---|
+| Cargo hold, internal | 3.75 m diameter, 5.4 m long |
+| Cargo volume | about 60 m³ |
+| Hull cylinder, external | about 4.0 m diameter, 7.5 m long, including the aft section behind the hold |
+| Crew sphere, external | about 2.8 m diameter |
+| Crew sphere, internal volume | about 9 m³ |
+| Gap between sphere and front cap | about 1.4 m |
+| Overall length | about 12 m |
+| Overall beam, across the shield generator | about 4.8 m |
+| Overall height, including the turret | about 4.6 m |
+| Dry mass | about 12 t |
+| Rated payload | about 15 t |
+
+At full volume, 15 t works out to an average density of about 0.25 t/m³. Light goods fill the hold before they reach the mass limit; dense goods hit the mass limit with the hold half empty.
 
 ## Appearance
 
-- Stock livery is yellow, with the black shield generator, bare aluminum struts, dark canopy glass, and amber lights.
+- Stock livery is yellow, with the black shield generator, bare aluminum struts, dark canopy glass, amber lights, and blue exhaust.
 - The sphere's diameter is roughly 60-75% of the cylinder's. It should read as a head, not as a second module of equal weight.
 - The gap is roughly half the sphere's diameter. Long enough to see through clearly, short enough to look attached.
 - Struts are thick enough to be at least ~2 pixels wide at gameplay zoom. Thin members will shimmer and read as noise.
@@ -134,22 +141,22 @@ Things that follow from the design, which missions, upgrades, and story should n
 
 - One crew member. No passengers, so no passenger missions.
 - The hold is unpressurized. Cargo that needs air or warmth - livestock, people, perishables - does not fit unless an upgrade says otherwise.
-- Not capable of atmospheric flight.
+- No artificial gravity. The pilot is weightless except under thrust.
+- Not capable of atmospheric flight. Most spobs are landed on by docking at an orbital station, then either taking a taxi to the surface or doing business at the station, so this rarely matters. The Bourdon cannot land on a spob that has no orbital station. Occasionally useful in missions.
 - One jump of range, stock.
 - There is no way to reach the cargo hold from the cabin in flight.
+- The ejected cabin cannot manoeuvre.
 - Super-luminal drives are not shown and not explained, on this ship or any other.
-- Neutral ships use amber lights.
+- Neutral ships use amber lights. The Bourdon's exhaust is blue, not amber.
 - CGF is the only manufacturer.
 
 ## Open questions
 
 - The name of the semi-neutral faction the Bourdon belongs to, and its relationship to France and to CGF.
-- **Landing.** The Bourdon cannot fly in an atmosphere, but landing is central to the game, and the starting ship has to be able to do it. Orbital stations, ground-to-orbit shuttles, or some other answer need to cover this.
 - What happens to the player after ejecting.
-- Whether the lifeboat can manoeuvre.
 - Specific effects of damage to each zone.
 - Which upgrades exist, which are official CGF parts, and which are aftermarket.
-- Numbers: cargo capacity, speed, acceleration, turn rate, shield and armor values, price.
+- Game stats: cargo capacity, speed, acceleration, turn rate, shield and armor values, price.
 - Dates.
 
 ## Visual references
