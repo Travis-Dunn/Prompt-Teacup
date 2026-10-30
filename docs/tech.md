@@ -11,7 +11,7 @@ Post-release stretch goals. Worth pursueing if some level of success if achieved
 - Physical release. By far the most fantastical item on the list, but it's something I would personally love to do. That said, this isn't happening unless we absolutely knock it out of the park. Not even worth considering until revenue exceeds 10x current goals.
 - DLC, specifically bringing mod support. Whitetail is built with mod support via a standard override directory in mind, and since I grew up in the modding community for various games, I would love to pay it forward. If the game is successful enough to warrant any DLC at all, it will have mod support tacked on as a value add.
 
-Shipped game code will be exclusively Java. Dev tooling is probably going to be standardized, but that's not yet decided. 
+Shipped game code will be exclusively Java. Dev tooling is probably going to be standardized, but that's not yet decided. Web, python, and java are all on the table.
 
 All source code must be Java SE 7 compatible. This goes for language features, API surface, and dependencies.
 
@@ -25,4 +25,6 @@ Teacup will run on a bundled JRE
 
 Yet to be decided - packaging, non-source code asset organization during development, and in the shipped game.
 
-File formats and properties for all sound, 3d, image, script, etc. files. Most of these will probably be proprietary binary formats built with dev tooling, from interchange formats such as .glb, .ogg, .png, etc.
+File formats and properties for all sound, 3d, image, script, etc. files. Most of these will probably be proprietary binary formats built with dev tooling, from interchange formats such as .glb, .ogg, .png, etc. **Update** 29 oct 29: Ship meshes will go straight from blender to the proprietary binary format, since I can just write a python export script.
+
+Text assets will probably be JSON.

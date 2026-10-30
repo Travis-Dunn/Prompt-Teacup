@@ -7,13 +7,13 @@
 | Full name, as printed in the shipyard | Ferrand Type 4 Bourdon |
 | Manufacturer | Compagnie Générale Ferrand (CGF, "Ferrand"), exclusively |
 | Role | Light freighter. The player's starting ship. |
-| Crew | One. No passengers, ever. |
+| Crew | One.  |
 | Range | One jump. The shortest range of any ship in the game. |
-| Weapons | One small defensive blaster turret, on top. No other mounts. |
+| Weapons | One small defensive turret, type TBD. |
 | Pressurized cargo | false |
 | Gravity | false |
 | Atmospheric flight | false |
-| Stock livery | Yellow body, black shield generator, bare aluminum struts, amber lights, blue exhaust |
+| Stock livery | Painted yellow, probably with some black. Otherwise utiliarian and old-fashioned. |
 
 ## Summary
 
@@ -21,17 +21,17 @@ The Bourdon is the ship that brought super-luminal travel to the masses. It is a
 
 ## The manufacturer
 
-Compagnie Générale Ferrand is a French conglomerate, in the mould of the big state-adjacent French industrial groups of the 1960s and 70s: it makes a bit of everything, and the Bourdon is only one of its product lines. CGF is the sole manufacturer of the Bourdon and always has been. Licensed production, if any, is **open**.
+Compagnie Générale Ferrand is a French conglomerate, in the mould of the big state-adjacent French industrial groups of the 1960s and 70s: it makes a bit of everything, and the Bourdon is only one of its product lines. CGF is the sole manufacturer of the Bourdon and always has been. It's also the only ship that they make, and it's production is a very small part of their portfolio. One may encounter their logo on things ranging from radar sets to toilet seats.
 
 The name "Bourdon" comes from the colours of the stock livery - yellow and black - and from the low drone of its engines. The old pilot's joke that a bumblebee shouldn't be able to fly applies.
 
 ## History
 
-- Introduced roughly fifty years before the game begins. Exact dates are **open**.
+- Introduced roughly fifty years before the game begins. Exact dates are TBD.
 - At the time, super-luminal drives and shield generators were both rare on civilian craft. The Bourdon was one of the first ships to put both within reach of ordinary people, and it did so by being ruthlessly economical about everything else.
 - The shield covers only the sides and rear. That was a cost decision: shield generators were expensive, and a freighter is supposed to run from a fight, not face it.
 - One jump of range was normal, or close to it, when the Bourdon was new. Today even regional ships manage two or three, and one jump is almost comical.
-- There is a wide array of bolt-on upgrades for it. A few are official CGF parts. Most are not. Which upgrades exist is **open**.
+- There is a wide array of bolt-on upgrades for it. A few are official CGF parts. Most are not. Which upgrades exist is TBD.
 
 ## Design philosophy
 
@@ -52,19 +52,18 @@ From front to back: crew sphere, struts across an open gap, then the cargo cylin
 
 - One pilot. Left-hand drive, so the pilot sits on the left (port) side.
 - The canopy is a smooth, flush bubble on the pilot's side only. Not faceted. The rest of the sphere is opaque yellow.
-- Strapped to the outside of the right (starboard) side: spherical gas bottles, a flat radiator panel, and an amber beacon. This is what keeps the silhouette asymmetrical.
-- The sphere can detach from the rest of the ship entirely. It is a lifeboat at most: it carries life support and the beacon, and cannot manoeuvre on its own. Once ejected, it drifts until someone picks it up.
+- The sphere can detach from the rest of the ship entirely and serve as a lifeboat. It's a non-manuevering lifeboat that simply waits for rescue.
 
 ### Struts and the gap
 
-- Three or four straight, bare aluminum struts run from the front cap of the cylinder to the sphere. No lattice truss.
-- A single cable bundle runs along one strut, carrying power and data to the rest of the ship. It is simply cut when the sphere ejects.
+- Three or four straight, bare aluminum struts run from the front cap of the cylinder to the sphere. No lattice truss because it isn't likely to read well when the ship is small on screen.
+- A single cable bundle runs along one strut.
 - The gap between sphere and cylinder is open space. It must be clearly visible from the gameplay camera, with stars showing through it.
 - On ejection, the sphere releases at the top of the struts. The struts stay with the hull.
 
 ### Front cap and cargo door
 
-- The front cap of the cargo cylinder is the cargo door. It is hinged on the right.
+- The front cap of the cargo cylinder is the cargo door, which opens on a hinge to access the cargo.
 - The struts and sphere are mounted to the cap, so the whole assembly - cap, struts, and sphere with the pilot in it - swings aside to open the hold, like the nose of a Super Guppy.
 
 ### Cargo cylinder
@@ -72,18 +71,21 @@ From front to back: crew sphere, struts across an open gap, then the cargo cylin
 - Unpressurized. Carries a small but meaningful amount of cargo.
 - The super-luminal drive is somewhere in the hull, aft of the hold, and is never shown. Its workings are never explained.
 - The defensive blaster turret sits on top of the cylinder.
+- Basically the space analogue of a 20' ISO 668 shipping container. This shows up a lot in spaceports, space stations, and in other freight ships.
 
 ### Shield generator
 
 - A U-shaped band wrapping around the sides and rear of the cylinder at its widest point.
-- Black, styled after the "diving board" rubber bumper on North American market BMW E30s. It should read as a bumper first.
-- Does not cover the front.
+- Black, styled after the "diving board" rubber bumper on 80s european imports such as the North American market BMW E30s. It should read as a bumper first.
+- Ends at the front of the cargo cylinder.
 
 ### Impulse engines
 
-- Two small, horizontal, linear engines at the aft end. One sits above the shield generator, one below.
+- Two small, vertical, linear engines at the aft end. One sits above the shield generator, one below.
 - They are small, and the ship is sluggish.
-- Exhaust glow is electric blue, leaning slightly violet - roughly the complement of the amber lights and the yellow hull (hue around 225°, e.g. `#3F6BFF`). The colour is chosen for contrast, not for any engineering reason.
+- Exhaust glow is faint, there is no plume.
+- They are essentially highly advanced, sci-fi versions of today's gridded electrostatic thrusters. They are 100 to 10,000 times better than today's thrusters depending on the metric, but are ubiquitous, appliance level tech in this world.
+- Runs on Mercury (small spherical tanks carried externally) and electricity provided by tiny hafnium isomer batteries - no reactor on board.
 
 ## Size and mass
 
@@ -107,11 +109,11 @@ At full volume, 15 t works out to an average density of about 0.25 t/m³. Light 
 
 ## Appearance
 
-- Stock livery is yellow, with the black shield generator, bare aluminum struts, dark canopy glass, amber lights, and blue exhaust.
-- The sphere's diameter is roughly 60-75% of the cylinder's. It should read as a head, not as a second module of equal weight.
+- Stock livery is yellow. I know we want some black as well, and I think the shield generator would be a good candidate.
+- The sphere's diameter is roughly 60-75% of the cylinder's. It should read as a small head, not as a second module of equal weight.
 - The gap is roughly half the sphere's diameter. Long enough to see through clearly, short enough to look attached.
 - Struts are thick enough to be at least ~2 pixels wide at gameplay zoom. Thin members will shimmer and read as noise.
-- The silhouette from above is "a ball, a gap, a can", inside a black U.
+- The silhouette from above is that of a rounded rectangle. Utilitarian and un-threatening.
 
 ## Locational damage
 
@@ -126,7 +128,7 @@ At full volume, 15 t works out to an average density of about 0.25 t/m³. Light 
 | Impulse engines | At the rear, where a fleeing ship takes most of its fire. |
 | Turret | On top. |
 
-The front is the most vulnerable part of the ship, and contains the most important things in it. That is deliberate. A freighter flown correctly shows its tail to the enemy, not its face. Specific effects for each zone are **open**.
+The front is the most vulnerable part of the ship, and contains the most important things in it. That is deliberate. A freighter flown correctly shows its tail to the enemy, not its face. Specific effects for each zone are TBD. The player will learn quickly that combat is for combatants, not freighters. Later, that rule will be broken, but it can't be broken until it's been established.
 
 ## Gameplay role
 
@@ -147,12 +149,11 @@ Things that follow from the design, which missions, upgrades, and story should n
 - There is no way to reach the cargo hold from the cabin in flight.
 - The ejected cabin cannot manoeuvre.
 - Super-luminal drives are not shown and not explained, on this ship or any other.
-- Neutral ships use amber lights. The Bourdon's exhaust is blue, not amber.
 - CGF is the only manufacturer.
 
 ## Open questions
 
-- The name of the semi-neutral faction the Bourdon belongs to, and its relationship to France and to CGF.
+- The name of the semi-neutral faction the Bourdon belongs to (if any), and its relationship to France and to CGF. France is part of NATO, but it's more complicated than that.
 - What happens to the player after ejecting.
 - Specific effects of damage to each zone.
 - Which upgrades exist, which are official CGF parts, and which are aftermarket.
@@ -166,4 +167,4 @@ Things that follow from the design, which missions, upgrades, and story should n
 - BMW E30, North American market - the "diving board" bumper.
 - Discovery One, *2001: A Space Odyssey* - spherical crew module on a spine.
 - Eagle Transporter, *Space: 1999* - crew pod on an exposed frame, and how to treat the frame.
-- The French Navy bathyscaphes *FNRS-3* and *Archimède* - spheres as the honest answer to pressure.
+- The French Navy bathyscaphes *FNRS-3* and *Archimède*. When pressure is to be taken seriously, one often ends up with a sphere.
