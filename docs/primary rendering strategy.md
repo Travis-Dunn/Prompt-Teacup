@@ -10,7 +10,7 @@ The core of the ship renderer is one universal system. It's made of a forward sh
 
 **Out of scope:** UI, HUD, text, spobs and the starfield. This doc only assumes they draw into the same HDR target, before and after ships. The internal design of each effects subsystem is also out of scope. The sketches under Effects subsystems are starting points, not decisions.
 
-**Taken as fixed:** Java SE 7, the lowest OpenGL version that gives us what we use (3.3 at most, see the OpenGL feature ledger), 60 fps on the benchmark machine, JSON text assets, and mod support through an override directory.
+**Taken as fixed:** Java SE 7, OpenGL 3.3 core (see the OpenGL feature ledger), the performance target in tech.md, JSON text assets, and mod support through an override directory.
 
 Principles, in priority order:
 
@@ -77,7 +77,7 @@ The sphere is its own node under the door assembly, so it can detach (Chunks and
 
 ## Export tool and runtime format
 
-A Python script running inside Blender writes the game's model file directly, with no .glb in between. This differs from the .glb-to-proprietary plan in tech.md. Blender's glTF exporter handles per-face integer data, object custom properties and empties unevenly, and its axis conversion isn't one we chose. Blender's own Python API exposes all of these as they are, so the exporter is a few hundred lines with no intermediate format to debug. glTF is still available for other kinds of assets.
+A Python script running inside Blender writes the game's model file directly, with no .glb in between. Blender's glTF exporter handles per-face integer data, object custom properties and empties unevenly, and its axis conversion isn't one we chose. Blender's own Python API exposes all of these as they are, so the exporter is a few hundred lines with no intermediate format to debug. glTF is still available for other kinds of assets.
 
 It runs in two ways:
 
@@ -94,20 +94,20 @@ It runs in two ways:
 | `decals/*.png` | You | Logos, insignia and lettering, all the same size |
 | `effects/*.json` | You | One file per effects subsystem, in whatever shape that subsystem defines |
 
-**Materials and parts are per face.** In the file, each triangle stores one material index and one part index, and vertices store only position, normal and UV. Before GL 3.2 there's no way to give the GPU per-face data directly, so the loader passes them as `flat` integer vertex attributes. `flat` means no interpolation at all: the whole triangle takes the value from one vertex, so the result is per-face in practice. The cost is that the loader duplicates a vertex wherever faces with different materials or parts meet. The copies share position and normal, so smooth shading is unaffected. A true per-face lookup avoids the duplicates, but it needs GL 3.2 and isn't worth it unless vertex counts become a problem (OpenGL feature ledger).
+**Materials and parts are per face.** In the file, each triangle stores one material index and one part index, and vertices store only position, normal and UV. The loader passes them to the GPU as `flat` integer vertex attributes. `flat` means no interpolation at all: the whole triangle takes the value from one vertex, so the result is per-face in practice. The cost is that the loader duplicates a vertex wherever faces with different materials or parts meet. The copies share position and normal, so smooth shading is unaffected. A true per-face lookup through `gl_PrimitiveID` avoids the duplicates, but it adds a buffer lookup per fragment and isn't worth it unless vertex counts become a problem (OpenGL feature ledger).
 
 **GPU vertex format, 24 bytes**
 
 | Attribute | Type | Bytes |
 | --- | --- | --- |
 | Position | 3 × float32 | 12 |
-| Normal | 3 × int8, normalized, plus 1 pad | 4 |
+| Normal | Packed 10:10:10:2 signed, normalized (`GL_INT_2_10_10_10_REV`), w unused | 4 |
 | UV | 2 × uint16, normalized (decals only, zero elsewhere) | 4 |
 | Material | uint8, flat integer attribute | 1 |
 | Part | uint8, flat integer attribute | 1 |
 | Padding | — | 2 |
 
-Indices are uint16. Each model gets one VBO, one IBO and one VAO, with one index range per node and per chunk.
+Indices are uint16. Each model gets one VBO, one IBO and one VAO, with one index range per node and per chunk. Indices in each range count from that range's first vertex, and each range is drawn with `glDrawElementsBaseVertex`, so the 65,536-vertex limit applies to each node and chunk rather than to the whole model.
 
 **Loading.** The material indices in the file point into the model's own name list. While expanding triangles, the loader swaps them for global library IDs, so library order can change and mods can add materials without anything being re-exported. A name the library doesn't know fails the load with an error naming the ship and the missing name, so a typo shows up in seconds instead of as a pink hull.
 
@@ -176,7 +176,7 @@ Not in the library, by design: normal maps, textures other than decals, anisotro
 
 ## Per-instance data
 
-Anything that can differ between two Bourdons on the same screen is per-instance data: the livery, the insignia, sixteen named signals, damage per part, and age. Gameplay code fills these values every frame, and the renderer never makes gameplay decisions.
+Anything that can differ between two Bourdons on the same screen is per-instance data: the livery, the insignia, the signals, damage per part, and age. Gameplay code fills these values every frame, and the renderer never makes gameplay decisions.
 
 | Uniform | Size | Set by |
 | --- | --- | --- |
@@ -184,11 +184,13 @@ Anything that can differ between two Bourdons on the same screen is per-instance
 | `uNode` | mat4 per node | Articulation, from signals |
 | `uLivery` | 4 × vec3 | The ship's livery: primary, secondary, stripe, trim |
 | `uInsignia` | int | Decal layer for `"decal": "instance"` materials |
-| `uSignal` | 16 floats | Ship systems, every frame |
+| `uSignal` | vec4[16], 64 signals | Ship systems, every frame |
 | `uDamage` | 32 floats, one per part | Damage model, 0 = intact, 1 = destroyed |
 | `uAge` | float | The ship record, if weathering is used |
 
 **Signals** are the one mechanism behind emission, glows, moving parts and effects subsystems. A material, glow, articulation or subsystem names a signal, the loader resolves each name to an index once, and gameplay writes plain floats.
+
+There is one list of signals for the whole game, not one per ship type. The loader collects every signal name that `materials.json`, the ship files and the effects files mention, and gives each a fixed index for the session. Every ship uses the same numbering, so the shared material table can store a signal's index directly. A ship never writes the signals it doesn't use, and they stay at 0. There's no hand-kept list: a new ship or a mod that names a new signal just gets the next free index. The limit is 64, and passing it fails the load with an error naming the signal.
 
 | Signal | Range | Drives |
 | --- | --- | --- |
@@ -201,7 +203,7 @@ Anything that can differ between two Bourdons on the same screen is per-instance
 | `turret_yaw`, `turret_pitch` | Degrees | Turret articulation |
 | `heat` | 1, decaying to 0 | Glow on fresh chunk cut faces |
 
-That leaves seven spare slots. Signal names are per ship type, so a later ship can add `gimbal`, `radiator`, or whatever its shield subsystem needs, without touching the renderer.
+A later ship can add `gimbal`, `radiator`, or whatever its shield subsystem needs, just by naming it, without touching the renderer.
 
 **Liveries and variants** live in the ship file. A livery is four colours. A variant is a livery, an optional insignia, and a list of optional parts to show, so each minor variant costs one JSON block.
 
@@ -278,13 +280,14 @@ These example systs show how much range the profile covers:
 - **Tonemap.** Render into RGBA16F, apply a filmic curve with the profile's exposure in the final pass, then write sRGB.
 
 ```glsl
-#version 140   // GLSL for GL 3.1, see OpenGL feature ledger
+#version 330 core   // see OpenGL feature ledger
 flat in int vMat; flat in int vPart;
 in vec3 vN; in vec3 vPosW; in vec3 vPosObj; in vec2 vUV;
 uniform sampler2D      uMaterials;          // RGBA32F, 5 texels x N materials
 uniform sampler2DArray uDecals;
 uniform vec3  uLivery[4];  uniform int uInsignia;
-uniform float uSignal[16]; uniform float uDamage[32];
+uniform vec4  uSignal[16];                  // 64 signals, one shared list
+uniform float uDamage[32];
 uniform vec4  uLightPos[12], uLightColor[12]; uniform int uLightCount;   // pos.w = radius
 out vec4 fragColor;
 
@@ -309,7 +312,8 @@ void main() {
   vec3 F90 = coated ? m4.rgb : vec3(1.0);
 
   // + key light, point lights (loop to uLightCount), ambient, environment, rim
-  vec3 emit = m1.rgb * (m1.a < 0.0 ? 1.0 : uSignal[int(m1.a)]);
+  int s = int(m1.a);
+  vec3 emit = m1.rgb * (s < 0 ? 1.0 : uSignal[s >> 2][s & 3]);
 }
 ```
 
@@ -395,7 +399,7 @@ The parts table is one more block in the ship file:
 
 ## Graphics settings
 
-Every cost that scales is a setting from the start. Each one is a uniform, a loop count, a texture size or a pass toggle, so changing a setting never needs a shader rebuild. The default preset is whatever holds 60 fps on the benchmark machine.
+Every cost that scales is a setting from the start. Each one is a uniform, a loop count, a texture size or a pass toggle, so changing a setting never needs a shader rebuild. The default preset is whatever meets the tech.md performance target on the benchmark machine.
 
 | Setting | Options | Affects |
 | --- | --- | --- |
@@ -413,7 +417,7 @@ Specular anti-aliasing and glow minimum sizes aren't settings. They're part of w
 
 ## OpenGL feature ledger
 
-Everything in this doc fits in GL 3.1 with GLSL 1.40, so that's the version to request until a bump buys something specific. Add a row here whenever the renderer starts using a new feature.
+The renderer uses OpenGL 3.3 core and GLSL 3.30, the same as the rest of the engine and Whitetail's `comp-renderer-gl33`. Everything in this doc fits in that. Add a row here whenever the renderer starts using a new feature.
 
 **In use**
 
@@ -425,19 +429,22 @@ Everything in this doc fits in GL 3.1 with GLSL 1.40, so that's the version to r
 | 2D texture arrays | 3.0 | Decals and insignia |
 | FBOs, multisample renderbuffers, `glBlitFramebuffer` | 3.0 | MSAA scene and resolve |
 | sRGB framebuffer | 3.0 | Final output |
+| `glDrawElementsBaseVertex` | 3.2 | One index range per node and per chunk, each with 16-bit indices |
+| Packed 2_10_10_10 vertex attributes | 3.3 | Normals |
+| Explicit attribute locations | 3.3 | Fixed vertex layout, as in the rest of the engine |
+| Timer queries | 3.3 | GPU time per pass. Development only. |
 | `glDepthRange`, `dFdx`/`dFdy` | 1.x | Depth slices, specular anti-aliasing |
 
-**Candidates for a bump**
+**Available, not yet used**
 
 | Feature | Core since | What it would buy | Verdict |
 | --- | --- | --- | --- |
-| Multisample textures | 3.2 | A custom resolve that tonemaps each sample before averaging. Very bright emissive edges such as lights, neon and plumes then antialias properly instead of stair-stepping, which a plain HDR resolve can't fix. | The strongest case. Bump to 3.2 if bright edges look jagged, which is likely given the neon look. 3.2 also brings a real core profile. |
+| Multisample textures | 3.2 | A custom resolve that tonemaps each sample before averaging. Very bright emissive edges such as lights, neon and plumes then antialias properly instead of stair-stepping, which a plain HDR resolve can't fix. | The strongest case. Use it if bright edges look jagged, which is likely given the neon look. |
 | `gl_PrimitiveID` in fragment shaders | 3.2 | True per-face lookup with no vertex duplication | Not needed |
 | Geometry shaders | 3.2 | Expanding sprites and ribbons on the GPU | Not needed, since CPU batching is simpler |
 | Fence sync | 3.2 | Streaming buffers without stalls | Buffer orphaning works without it |
-| Instanced arrays | 3.3 | Cheap instancing for swarms of identical missiles or particles | Only if a profile asks for it |
-| Timer queries | 3.3 | GPU time per pass | Development only. Use the extension where it exists. |
-| Packed 10-bit normals, explicit attribute locations, sampler objects | 3.3 | Convenience | Not needed |
+| Instanced arrays | 3.3 | Cheap instancing for swarms of identical missiles or particles. Whitetail's `GLInstanceBuffer` already wraps it. | Only if a profile asks for it |
+| Sampler objects | 3.3 | Convenience | Not needed |
 
 ## Per-ship checklist and build order
 
@@ -472,9 +479,9 @@ Once the pipeline exists, a ship's universal side costs its modelling plus a sho
 
 ## Open questions and deferred features
 
-The hardware baseline is still open, so the renderer asks for the lowest GL version it actually uses (OpenGL feature ledger). At 3.1 it runs on the T420's integrated HD 3000 on Windows, which Intel caps at GL 3.1 ([Intel forum](https://forums.intel.com/t5/Graphics/Intel-HD-3000-will-intel-provide-a-update-to-support-opengl-3-3/m-p/452037/highlight/true)), and on Linux, where Mesa reached 3.2 on that chip in 2014 ([Phoronix](https://www.phoronix.com/news/MTc5MTg)). A bump to 3.2 would rule out the first of those.
+The benchmark machine is the T420 running Linux Mint (tech.md). Mesa gives its integrated HD 3000 a GL 3.3 core context ([Phoronix](https://www.phoronix.com/review/crocus-sandy-bridge)). Intel's Windows driver for that chip stops at GL 3.1 ([Intel forum](https://forums.intel.com/t5/Graphics/Intel-HD-3000-will-intel-provide-a-update-to-support-opengl-3-3/m-p/452037/highlight/true)), so on Windows, XP included, the game needs a graphics driver that supports 3.3.
 
-- [ ] Choose the benchmark configuration and the XP machine. That decides whether a bump to 3.2 is free.
+- [ ] Choose the XP test machine.
 - [ ] Decide the depth-slice order: does the player's ship always draw on top, or is everything sorted by distance from the camera?
 - [ ] Set the camera tilt, field of view, and zoom-to-ship-size rule.
 - [ ] Decide whether kinetic weapons stay in the game or move to the DLC list.
@@ -484,6 +491,6 @@ The hardware baseline is still open, so the renderer asks for the lowest GL vers
 
 **Built, decision deferred:** damage and weathering noise.
 
-**Later, if a profile asks:** instancing, a custom HDR resolve (GL 3.2).
+**Later, if a profile asks:** instancing, a custom HDR resolve (multisample textures).
 
 **Ruled out:** normal maps, textures other than decals, real transparency, shadows during gameplay, and keyframed or skeletal animation.
